@@ -62,8 +62,8 @@ class AdminMpBrtController extends ModuleAdminController {
 
         parent::initContent();
         
-        $curl = new classMpCurl();
-        $this->context->smarty->assign('response', $curl->request($method, $params));
+        $curl = new classMpSoap();
+        $this->context->smarty->assign('response', $curl->request('', array()));
         $content = $this->smarty->fetch(_MPBRT_TEMPLATES_ . 'admin/displayPage.tpl');
         
         $this->context->smarty->assign('content', $this->content . $content);

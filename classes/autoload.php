@@ -26,7 +26,7 @@
 
 $classes = array(
     'classMpLogger',
-    'classMpCurl',
+    'classMpSoap',
 );
 
 foreach ($classes as $class)

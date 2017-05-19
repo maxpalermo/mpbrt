@@ -99,6 +99,7 @@ class MpBrt extends Module
         if (!parent::install() ||
                 !$this->registerHook('displayAdminOrder') ||
                 !$this->registerHook('displayBackOfficeHeader') ||
+                !$this->registerHook('displayAdminOrder') ||
                 !$this->installTab()) {
             return false;
         }
@@ -107,8 +108,7 @@ class MpBrt extends Module
     
     public function uninstall()
     {
-        if (!parent::uninstall() || 
-                !$this->uninstallSql()) {
+        if (!parent::uninstall()) {
             return false;
         }
         return true;
@@ -146,15 +146,10 @@ class MpBrt extends Module
     public function hookDisplayAdminOrder($params)
     {
         $id_order = (int)Tools::getValue('id_order');
-        //Assign Smarty Variables
-        $this->context->smarty->assign(array(
-                'list_status' => 'ELENCO STATI',
-                'start_date' => "DATA INIZIO",
-                'end_date' => "DATA INIZIO",
-                'linkToAdmin' => Context::getContext()->link->getAdminLink('AdminMpBrt'),
-                'id_order' => $id_order,
-        ));
-        return $this->display(__FILE__, 'displayPage.tpl');
+        
+        $smarty = Context::getContext()->smarty;
+        $smarty->assign('id_order', $id_order);
+        return $this->display(__FILE__, 'displayShippingHistory.tpl');
     }
     
     public function hookDisplayBackOfficeHeader($params)
