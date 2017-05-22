@@ -24,41 +24,20 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-try {
-    classMpLogger::exists();
-    return;
-} catch (Exception $exc) {
-    //nothing
-}
+class classBrtAssicurazione {
+    private $divisa;
+    private $importo;
+    
+    public function __construct($assicurazione) {
+        $this->divisa = $assicurazione->ASSICURAZIONE_DIVISA;
+        $this->importo = $assicurazione->ASSICURAZIONE_IMPORTO;
+    }
+    
+    function getDivisa() {
+        return $this->divisa;
+    }
 
-class classMpLogger {
-    public static function add($message)
-    {
-        $debug = true;
-        
-        if ($debug==false) {
-           return; 
-        }
-        
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        $function = debug_backtrace()[1]['function'];
-        $log = date('Y-m-d h:i:s') . " [" . $function . '] => ' . $message;
-        $handle = fopen($filename, 'a');
-        fwrite($handle,$log);
-        fwrite($handle,PHP_EOL);
-        fclose($handle);
-    }
-    
-    public static function clear()
-    {
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
-    }
-    
-    public static function exists()
-    {
-        return true;
+    function getImporto() {
+        return $this->importo;
     }
 }

@@ -24,41 +24,34 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-try {
-    classMpLogger::exists();
-    return;
-} catch (Exception $exc) {
-    //nothing
-}
+class classBrtContrassegno {
+    private $divisa;
+    private $importo;
+    private $incasso;
+    private $particolarita;
+    
+    public function __construct($contrassegno) {
+        $this->divisa = $contrassegno->DIVISA;
+        $this->importo = $contrassegno->IMPORTO;
+        $this->incasso = $contrassegno->INCASSO;
+        $this->particolarita = $contrassegno->PARTICOLARITA;
+    }
+    
+    function getDivisa() {
+        return $this->divisa;
+    }
 
-class classMpLogger {
-    public static function add($message)
-    {
-        $debug = true;
-        
-        if ($debug==false) {
-           return; 
-        }
-        
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        $function = debug_backtrace()[1]['function'];
-        $log = date('Y-m-d h:i:s') . " [" . $function . '] => ' . $message;
-        $handle = fopen($filename, 'a');
-        fwrite($handle,$log);
-        fwrite($handle,PHP_EOL);
-        fclose($handle);
+    function getImporto() {
+        return $this->importo;
     }
-    
-    public static function clear()
-    {
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
+
+    function getIncasso() {
+        return $this->incasso;
     }
-    
-    public static function exists()
-    {
-        return true;
+
+    function getParticolarita() {
+        return $this->particolarita;
     }
+
+
 }

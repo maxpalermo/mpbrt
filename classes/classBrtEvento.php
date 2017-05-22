@@ -24,41 +24,40 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-try {
-    classMpLogger::exists();
-    return;
-} catch (Exception $exc) {
-    //nothing
-}
+class classBrtEvento {
+    private $data;
+    private $descrizione;
+    private $filiale;
+    private $id;
+    private $ora;
+    
+    public function __construct($evento) {
+        $this->data = $evento->DATA;
+        $this->descrizione = $evento->DESCRIZIONE;
+        $this->filiale = $evento->FILIALE;
+        $this->id = $evento->ID;
+        $this->ora = $evento->ORA;
+    }
+    
+    function getData() {
+        return $this->data;
+    }
 
-class classMpLogger {
-    public static function add($message)
-    {
-        $debug = true;
-        
-        if ($debug==false) {
-           return; 
-        }
-        
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        $function = debug_backtrace()[1]['function'];
-        $log = date('Y-m-d h:i:s') . " [" . $function . '] => ' . $message;
-        $handle = fopen($filename, 'a');
-        fwrite($handle,$log);
-        fwrite($handle,PHP_EOL);
-        fclose($handle);
+    function getDescrizione() {
+        return $this->descrizione;
     }
-    
-    public static function clear()
-    {
-        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
+
+    function getFiliale() {
+        return $this->filiale;
     }
-    
-    public static function exists()
-    {
-        return true;
+
+    function getId() {
+        return $this->id;
     }
+
+    function getOra() {
+        return $this->ora;
+    }
+
+
 }

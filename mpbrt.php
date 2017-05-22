@@ -28,7 +28,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once(dirname(__FILE__) . '/classes/autoload.php');
+require_once(dirname(__FILE__) . '/classes/classMpBrtAutoload.php');
     
 class MpBrt extends Module
 {
@@ -145,10 +145,25 @@ class MpBrt extends Module
     
     public function hookDisplayAdminOrder($params)
     {
-        $id_order = (int)Tools::getValue('id_order');
+        classMpLogger::clear();
+        classMpBrtAutoload::register();
         
         $smarty = Context::getContext()->smarty;
+        
+        $id_customer = ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $id_order = (int)Tools::getValue('id_order');
+        $soap = new classMpSoap($id_customer, $this);
+        //$soap->getOrderHistory('10001093');
+        $soap->request();
+        $bolla = $soap->getBolla();
+        if(!is_object($bolla)) {
+            $smarty->assign('events', array());
+        } else {
+            $smarty->assign('events', $bolla->getEventi());
+        }
+        $smarty->assign('soap', $soap);
         $smarty->assign('id_order', $id_order);
+        
         return $this->display(__FILE__, 'displayShippingHistory.tpl');
     }
     
@@ -160,6 +175,9 @@ class MpBrt extends Module
     
     public function getContent()
     {
+        classMpLogger::clear();
+        classMpBrtAutoload::register();
+        
         $this->smarty = Context::getContext()->smarty;
         $controller = $this->getHookController('getContent');
         return $controller->run();

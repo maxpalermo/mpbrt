@@ -24,8 +24,6 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-require_once(_PS_TOOL_DIR_.'tcpdf/config/lang/eng.php');
-require_once(_PS_TOOL_DIR_.'tcpdf/tcpdf.php');
 class AdminMpBrtController extends ModuleAdminController {
     public $smarty;
     public $lang;
@@ -62,8 +60,10 @@ class AdminMpBrtController extends ModuleAdminController {
 
         parent::initContent();
         
-        $curl = new classMpSoap();
-        $this->context->smarty->assign('response', $curl->request('', array()));
+        $customer_id = ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $soap = new classMpSoap($customer_id, $this);
+        
+        $this->context->smarty->assign('response', $soap->getOrderHistory('10001093'));
         $content = $this->smarty->fetch(_MPBRT_TEMPLATES_ . 'admin/displayPage.tpl');
         
         $this->context->smarty->assign('content', $this->content . $content);

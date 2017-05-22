@@ -30,7 +30,7 @@ class MpBrtGetContentController
     private $lang;
     private $smarty;
     private $context;
-    private $class;
+    private $saved;
     private $file;
     
     public function __construct($module, $file, $path)
@@ -45,12 +45,20 @@ class MpBrtGetContentController
     
     public function renderForm()
     {
-        //$this->class->setMedia();
         $this->setMedia();
+        $customer_id = (int)ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
         
-        $this->smarty->assign('brt_customer_id', '1690519');
+        $this->smarty->assign('brt_customer_id', $customer_id);
+        if($this->saved) {
+            $this->smarty->assign('saved', 1);
+        }
         
         $template  = $this->module->display($this->file, 'getContent.tpl');
+        if($this->saved) {
+            $template = 
+                    $this->module->displayConfirmation($this->module->l('Customer id saved successfully.', 'mpbrt'))
+                    . $template;
+        }
         return $template;
     }
 
@@ -60,177 +68,18 @@ class MpBrtGetContentController
         $this->context->controller->addCSS(_MPBRT_CSS_URL_ . 'getContent.css');
     }
     
-    public function getTaxList()
+    public function postProcess()
     {
-        $taxes = TaxCore::getTaxes($this->_lang);
-        $options = array();
-        $options[] = "<option value='0'>" . $this->module->l('Please select', 'getContent') . "</option>";
-        foreach ($taxes as $tax) {
-            $options[] = "<option value='" . $tax['rate'] . "'>" . $tax['name'] . "</option>";
+        if(Tools::isSubmit('submit_customer_save')) {
+            $customer_id = (int)Tools::getValue('input_customer_id','0');
+            ConfigurationCore::updateValue('MP_BRT_CUSTOMER_ID', $customer_id);
+            $this->saved = true;
         }
-        return implode("\n", $options);
-    }
-    
-    public function getCarrierList()
-    {
-        $carriers = CarrierCore::getCarriers($this->_lang);
-        $options = array();
-        foreach ($carriers as $carrier) {
-            $options[] = "<option value='" . $carrier['id_carrier'] . "'>" . Tools::strtoupper($carrier['name']) . "</option>";
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getCategoriesList()
-    {
-        $categories = CategoryCore::getCategories($this->_lang);
-        $options = array();
-        foreach ($categories as $category) {
-            foreach ($category as $cat) {
-                $options[] = "<option value='" . $cat['infos']['id_category'] . "'>" . Tools::strtoupper($cat['infos']['name']) . "</option>";
-            }
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getManufacturersList()
-    {
-        $items = ManufacturerCore::getManufacturers();
-        $options = array();
-        foreach ($items as $item) {
-            $options[] = "<option value='" . $item['id_manufacturer'] . "'>" . Tools::strtoupper($item['name']) . "</option>";
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getSuppliersList()
-    {
-        $items = SupplierCore::getSuppliers();
-        $options = array();
-        foreach ($items as $item) {
-            $options[] = "<option value='" . $item['id_supplier'] . "'>" . Tools::strtoupper($item['name']) . "</option>";
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getProductsList()
-    {
-        $items = ProductCore::getSimpleProducts($this->_lang);
-        $options = array();
-        foreach ($items as $item) {
-            $options[] = "<option value='" . $item['id_product'] . "'>" . Tools::strtoupper($item['name']) . "</option>";
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getOrderStateList()
-    {
-        $items = OrderStateCore::getOrderStates($this->_lang);
-        $options = array();
-        foreach ($items as $item) {
-            $options[] = "<option value='" . $item['id_order_state'] . "'>" . Tools::strtoupper($item['name']) . "</option>";
-        }
-        return implode("\n", $options);
-    }
-    
-    public function getCashValues()
-    {
-        $cash = new stdClass();
-        $values = new ClassMpPaymentConfiguration();
-        $values->read(classCart::CASH);
-        
-        $cash->input_switch_on      = $values->is_active;
-        $cash->fee_type             = $values->fee_type;
-        $cash->fee_amount           = $values->fee_amount;
-        $cash->fee_percent          = $values->fee_percent;
-        $cash->fee_min              = $values->fee_min;
-        $cash->fee_max              = $values->fee_max;
-        $cash->order_min            = $values->order_min;
-        $cash->order_max            = $values->order_max;
-        $cash->order_free           = $values->order_free;
-        $cash->tax_included         = $values->tax_included;
-        $cash->tax_rate             = number_format($values->tax_rate, 3);
-        $cash->carriers             = $this->toArray($values->carriers);
-        $cash->categories           = $this->toArray($values->categories);
-        $cash->manufacturers        = $this->toArray($values->manufacturers);
-        $cash->suppliers            = $this->toArray($values->suppliers);
-        $cash->products             = $this->toArray($values->products);
-        $cash->id_order_state       = $values->id_order_state;
-        
-        return $cash;
-    }
-    
-    public function getBankwireValues()
-    {
-        $bankwire = new stdClass();
-        $values = new ClassMpPaymentConfiguration();
-        $values->read(classCart::BANKWIRE);
-        
-        $bankwire->input_switch_on      = $values->is_active;
-        $bankwire->discount             = $values->discount;
-        $bankwire->fee_type             = $values->fee_type;
-        $bankwire->fee_amount           = $values->fee_amount;
-        $bankwire->fee_percent          = $values->fee_percent;
-        $bankwire->fee_min              = $values->fee_min;
-        $bankwire->fee_max              = $values->fee_max;
-        $bankwire->order_min            = $values->order_min;
-        $bankwire->order_max            = $values->order_max;
-        $bankwire->order_free           = $values->order_free;
-        $bankwire->tax_included         = $values->tax_included;
-        $bankwire->tax_rate             = number_format($values->tax_rate, 3);
-        $bankwire->carriers             = $this->toArray($values->carriers);
-        $bankwire->categories           = $this->toArray($values->categories);
-        $bankwire->manufacturers        = $this->toArray($values->manufacturers);
-        $bankwire->suppliers            = $this->toArray($values->suppliers);
-        $bankwire->products             = $this->toArray($values->products);
-        $bankwire->id_order_state       = $values->id_order_state;
-        
-        return $bankwire;
-    }
-    
-    public function getPaypalValues()
-    {
-        $paypal = new stdClass();
-        $values = new ClassMpPaymentConfiguration();
-        $values->read(classCart::PAYPAL);
-        
-        $paypal->input_switch_on      = $values->is_active;
-        $paypal->discount             = $values->discount;
-        $paypal->fee_type             = $values->fee_type;
-        $paypal->fee_amount           = $values->fee_amount;
-        $paypal->fee_percent          = $values->fee_percent;
-        $paypal->fee_min              = $values->fee_min;
-        $paypal->fee_max              = $values->fee_max;
-        $paypal->order_min            = $values->order_min;
-        $paypal->order_max            = $values->order_max;
-        $paypal->order_free           = $values->order_free;
-        $paypal->tax_included         = $values->tax_included;
-        $paypal->tax_rate             = number_format($values->tax_rate, 3);
-        $paypal->carriers             = $this->toArray($values->carriers);
-        $paypal->categories           = $this->toArray($values->categories);
-        $paypal->manufacturers        = $this->toArray($values->manufacturers);
-        $paypal->suppliers            = $this->toArray($values->suppliers);
-        $paypal->products             = $this->toArray($values->products);
-        $paypal->id_order_state       = $values->id_order_state;
-        
-        return $paypal;
-    }
-    
-    public function toArray($input_string, $separator = ",")
-    {
-        if (empty($input_string)) {
-            return array();
-        }
-        
-        if (is_array($input_string)) {
-            return $input_string;
-        }
-        
-        return explode($separator, $input_string);
     }
     
     public function run()
     {
+        $this->postProcess();
         $html_form = $this->renderForm();
         return $html_form;
     }

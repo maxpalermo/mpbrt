@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 2017 mpSOFT
  *
@@ -23,15 +24,34 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-
-$classes = array(
-    'classMpLogger',
-    'classMpSoap',
-);
-
-foreach ($classes as $class)
-{
-    if(!class_exists($class)) {
-        require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . $class . ".php");
+class classBrtMerce {
+    private $colli;
+    private $natura_merce;
+    private $peso_kg;
+    private $volume_m3;
+    
+    public function __construct($merce) {
+        $this->colli = $merce->COLLI;
+        $this->natura_merce = $merce->NATURA_MERCE;
+        $this->peso_kg = $merce->PESO_KG;
+        $this->volume_m3 = $merce->VOLUME_M3;
     }
+    
+    function getColli() {
+        return $this->colli;
+    }
+
+    function getNaturaMerce() {
+        return $this->natura_merce;
+    }
+
+    function getPesoKg() {
+        return $this->peso_kg;
+    }
+
+    function getVolumeM3() {
+        return $this->volume_m3;
+    }
+
+
 }

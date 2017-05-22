@@ -42,49 +42,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><i class='icon icon-truck'></i></td>
-                        <td><span>{l s='701'}</span></td>
-                        <td><span>{l s='RITIRATA'}</span></td>
-                        <td><span>{l s='23.03.2017'}</span></td>
-                        <td><span>{l s='12.00'}</span></td>
-                        <td><span>{l s='CASTROVILLARI'}</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class='icon icon-truck'></i></td>
-                        <td><span>{l s='702'}</span></td>
-                        <td><span>{l s='PARTITA'}</span></td>
-                        <td><span>{l s='23.03.2017'}</span></td>
-                        <td><span>{l s='21.00'}</span></td>
-                        <td><span>{l s='CASTROVILLARI'}</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class='icon icon-truck'></i></td>
-                        <td><span>{l s='703'}</span></td>
-                        <td><span>{l s='ARRIVATA IN FILIALE'}</span></td>
-                        <td><span>{l s='24.03.2017'}</span></td>
-                        <td><span>{l s='08.14'}</span></td>
-                        <td><span>{l s='CREMONA'}</span></td>
-                    </tr>
-                    <tr>
-                        <td><i class='icon icon-hand-up'></i></td>
-                        <td><span>{l s='704'}</span></td>
-                        <td><span>{l s='CONSEGNATA'}</span></td>
-                        <td><span>{l s='23.03.2017'}</span></td>
-                        <td><span>{l s='12.04'}</span></td>
-                        <td><span>{l s='CREMONA'}</span></td>
-                    </tr>
+                    {foreach $eventi as $evento}
+                        <tr>
+                            <td><i class='icon icon-truck'></i></td>
+                            <td><span>{$evento->ID}</span></td>
+                            <td><span>{$evento->DESCRIZIONE}</span></td>
+                            <td><span>{$evento->DATA}</span></td>
+                            <td><span>{$evento->ORA}</span></td>
+                            <td><span>{$evento->FILIALE}</span></td>
+                        </tr>
+                    {/foreach}
                 </tbody>
             </table>
 
         </div>
         
         <div class="panel-footer">
-            <button type="submit" value="1" id="submit_cash_save" name="submit_cash_save" class="btn btn-default pull-right">
-                <i class="process-icon-save"></i> 
-                {l s='Save' mod='mpadvpayment'}
+            <button type="button" value="1" id="submit_cash_save" name="button_tracking_info" class="btn btn-default pull-right">
+                <i class="process-icon-plus"></i> 
+                {l s='More info' mod='mpadvpayment'}
             </button>
         </div>
     </div>
 </form>
-            
+
+<div class="panel">
+    <div class='panel-heading'>
+        <i class='icon-info'></i>
+        INFO:
+    </div>
+    <span>CODICE: {$soap->getResultCode()}</span>
+    <br>
+    <span>MESSAGGIO: {$soap->getResultMessage()}</span>
+    <pre>
+        {$soap->getResult()|print_r}
+    </pre>
+</div>
