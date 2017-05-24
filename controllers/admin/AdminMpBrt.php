@@ -60,12 +60,118 @@ class AdminMpBrtController extends ModuleAdminController {
 
         parent::initContent();
         
-        $customer_id = ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
-        $soap = new classMpSoap($customer_id, $this);
+        $customer_id = (int)ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
+        $id_tracking_order = (int)ConfigurationCore::get('MP_BRT_ID_TRACKING_ORDER');
+        $id_delivered_order = (int)ConfigurationCore::get('MP_BRT_ID_DELIVERED_ORDER');
         
-        $this->context->smarty->assign('response', $soap->getOrderHistory('10001093'));
+        $soap = new classMpSoap($customer_id, Context::getContext()->controller);
+        
+        $db = Db::getInstance();
+        $sql = new DbQueryCore();
+        $sql    ->select('id_order')
+                ->select('reference')
+                ->from('orders');
+        if($id_carrier_display!=0) {
+            $sql->where('id_carrier = ' . pSQL($id_carrier_display));
+        }
+        if($id_delivered_order!=0) {
+            $sql->where('current_state != ' . pSQL($id_delivered_order));
+        }
+        
+        $orders = $db->executeS($sql);
+        $rows = array();
+        
+        foreach($orders as $order)
+        {
+            $evt = $soap->seekForDeliveredState((int)$order['reference']);
+            if($evt!==false) {
+                $row = $this->buildStatusRow($evt);
+                $rows[] = $row;
+            } else {
+                $row = new stdClass();
+                $row->DATA=date('d.m.Y');
+                $row->DESCRIZIONE=$this->getResultMessage($soap->getResultCode());
+                $row->FILIALE='';
+                $row->ID=$soap->getResultCode();
+                $row->ORA=date('h:i:s');
+                $row->REFERENCE=$order['reference'];
+                $row->TRACKING_ID='ERROR';
+                $tr = $this->buildStatusRow($row);
+                $rows[] = $tr;
+            }
+        }
+                
+        $this->context->smarty->assign('rows', implode(PHP_EOL, $rows));
+        $this->context->smarty->assign('cont', $this->content);
+        $this->context->smarty->assign('orders', $orders);
+        $this->context->smarty->assign('sql', $sql->__toString());
         $content = $this->smarty->fetch(_MPBRT_TEMPLATES_ . 'admin/displayPage.tpl');
         
         $this->context->smarty->assign('content', $this->content . $content);
     } 
+    
+    private function buildStatusRow($row)
+    {
+        if($row->ID<0) {
+            $icon = "<td><i class='icon icon-warning'></i></td>";
+        } else {
+            $icon = "<td><i class='icon icon-truck'></i></td>";
+        }
+        $tr = "<tr>"  
+                . $icon
+                . "<td>" . $row->ID . "</td>"
+                . "<td>" . $row->DATA . "</td>"
+                . "<td>" . $row->ORA . "</td>"
+                . "<td>" . $row->DESCRIZIONE . "</td>"
+                . "<td>" . $row->FILIALE . "</td>"
+                . "<td>" . $row->REFERENCE . "</td>"
+                . "<td>" . $row->TRACKING_ID . "</td>"
+                ."<tr>";
+        return $tr;
+    }
+    
+    /**
+     * Returns Operation message
+     * @return mixed String message of result operation or FALSE if empty
+     */
+    private function getResultMessage($esito)
+    {
+        $message = "";
+        
+        if(!empty($esito) && !empty($esito))
+        {
+            switch ((int)$esito) {
+                case 0:
+                    $message = $this->l('OK','classMpSoap');
+                    break;
+                case -1:
+                    $message = $this->l('UNKNOWN ERROR','classMpSoap');
+                    break;
+                case -3:
+                    $message = $this->l('ERROR CONNECTING DATABASE', 'classMpSoap');
+                    break;
+                case -20:
+                    $message = $this->l('NO SENDER RECEIVED', 'classMpSoap');
+                    break;
+                case -21:
+                    $message = $this->l('CUSTOMER NOT VALID', 'classMpSoap');
+                    break;
+                case -11:
+                    $message = $this->l('SHIPPING NOT FOUND', 'classMpSoap');
+                    break;
+                case -22:
+                    $message = $this->l('MORE THAN ONE SHIPPING FOUND', 'classMpSoap');
+                    break;
+                default:
+                    if ((int)$this->result->ESITO >0) {
+                        $message = $this->l('WARNINGS DURING FUNCTION CALL', 'classMpSoap');
+                    } else {
+                        $message = '';
+                    }
+                    break;
+            }
+        }
+        return $message;
+    }
 }

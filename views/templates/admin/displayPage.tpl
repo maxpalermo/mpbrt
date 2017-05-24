@@ -29,9 +29,43 @@
         <span>{l s='Bartolini' mod='mpbrt'}</span>
     </div>
     <div class='panel-body'>
+        <div class='panel-body'>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th><span class="title_box">{l s='ID'}</span></th>
+                        <th><span class="title_box">{l s='DATE'}</span></th>
+                        <th><span class="title_box">{l s='TIME'}</span></th>
+                        <th><span class="title_box">{l s='EVENT'}</span></th>
+                        <th><span class="title_box">{l s='BRANCH'}</span></th>
+                        <th><span class="title_box">{l s='REFERENCE'}</span></th>
+                        <th><span class="title_box">{l s='TRACKING_ID'}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {$rows}
+                </tbody>
+            </table>
+        </div>
+        
+        
         <pre>
             <xmp>
-                {$response|print_r}
+                sql:
+                {$sql}
+            </xmp>
+            <xmp>
+                content:
+                {$cont|print_r}
+            </xmp>
+            <xmp>
+                orders:
+                {$orders|print_r}
+            </xmp>
+            <xmp>
+                rows:
+                {$rows|print_r}
             </xmp>
         </pre>
     </div>

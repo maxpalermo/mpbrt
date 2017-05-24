@@ -34,6 +34,7 @@ class classMpSoap {
     private $result;
     private $bolla;
     private $customer_id;
+    private $customer_reference;
     private $module;
     private $debug;
     private $tracking_id;
@@ -84,29 +85,29 @@ class classMpSoap {
         {
             switch ((int)$this->result->ESITO) {
                 case 0:
-                    $message = $this->module->l('OK','classMpSoap');
+                    $message = Context::getContext()->controller->l('OK','classMpSoap');
                     break;
                 case -1:
-                    $message = $this->module->l('UNKNOWN ERROR','classMpSoap');
+                    $message = Context::getContext()->controller->l('UNKNOWN ERROR','classMpSoap');
                     break;
                 case -3:
-                    $message = $this->module->l('ERROR CONNECTING DATABASE', 'classMpSoap');
+                    $message = Context::getContext()->controller->l('ERROR CONNECTING DATABASE', 'classMpSoap');
                     break;
                 case -20:
-                    $message = $this->module->l('NO SENDER RECEIVED', 'classMpSoap');
+                    $message = Context::getContext()->controller->l('NO SENDER RECEIVED', 'classMpSoap');
                     break;
                 case -21:
-                    $message = $this->module->l('CUSTOMER NOT VALID', 'classMpSoap');
+                    $message = Context::getContext()->controller->l('CUSTOMER NOT VALID', 'classMpSoap');
                     break;
                 case -11:
-                    $message = $this->module->l('SHIPPING NOT FOUND', 'classMpSoap');
+                    $message = Context::getContext()->controller->l('SHIPPING NOT FOUND', 'classMpSoap');
                     break;
                 case -22:
-                    $message = $this->module->l('MORE THAN ONE SHIPPING FOUND', 'classMpSoap');
+                    $message = Context::getContext()->controller->l('MORE THAN ONE SHIPPING FOUND', 'classMpSoap');
                     break;
                 default:
                     if ((int)$this->result->ESITO >0) {
-                        $message = $this->module->l('WARNINGS DURING FUNCTION CALL', 'classMpSoap');
+                        $message = Context::getContext()->controller->l('WARNINGS DURING FUNCTION CALL', 'classMpSoap');
                     } else {
                         $message = '';
                     }
@@ -145,14 +146,27 @@ class classMpSoap {
      */
     public function getTrackingByRMN($id_order)
     {
+        $this->customer_reference = $id_order;
         $url = 'http://wsr.brt.it:10041/web/GetIdSpedizioneByRMNService/GetIdSpedizioneByRMN?wsdl';
-        $client = new SoapClient($url);
+        try {
+            $client = new SoapClient($url);
+        } catch (Exception $exc) {
+            classMpLogger::add($exc->getMessage());
+            return false;
+        }
         
         $request = new stdClass();
         $request->CLIENTE_ID = $this->customer_id;
         $request->RIFERIMENTO_MITTENTE_NUMERICO = $id_order;
         
-        $result = $client->getidspedizionebyrmn(array('arg0' => $request));
+        try {
+            $result = $client->getidspedizionebyrmn(array('arg0' => $request));
+        } catch (Exception $exc) {
+            classMpLogger::add($exc->getMessage());
+            return false;
+        }
+
+        
         $this->result = $result->return;
         $this->tracking_id = (int)$this->result->SPEDIZIONE_ID;
         
@@ -170,14 +184,24 @@ class classMpSoap {
     public function getTrackingInfoByTrackingId($tracking_id)
     {
         $url = 'http://wsr.brt.it:10041/web/BRT_TrackingByBRTshipmentIDService/BRT_TrackingByBRTshipmentID?wsdl';
-        $client = new SoapClient($url);
+        try {
+            $client = new SoapClient($url);
+        } catch (Exception $ex) {
+            classMpLogger::add($ex->getMessage());
+            return false;
+        }
         $request = new stdClass();
         $request->LINGUA_ISO639_ALPHA2 = '';
-        $request->SPEDIZIONE_ANNO = '2017';
-        $request->SPEDIZIONE_BRT_ID = '169010023175';
+        $request->SPEDIZIONE_ANNO = '';
+        $request->SPEDIZIONE_BRT_ID = $tracking_id;
         
-        
-        $result = $client->brt_trackingbybrtshipmentid(array('arg0' => $request));
+        try {
+            $result = $client->brt_trackingbybrtshipmentid(array('arg0' => $request));
+        } catch (Exception $exc) {
+            classMpLogger::add($exc->getMessage());
+            return false;
+        }
+
         $this->result = $result->return;
         
         if ($this->debug) {
@@ -194,7 +218,6 @@ class classMpSoap {
         }
     }
     
-    
     public function getOrderHistory($id_order) {
         $this->getTrackingByRMN($id_order);
         if($this->getResultCode()==0) {
@@ -204,42 +227,49 @@ class classMpSoap {
         }
     }
     
-    public function request()
+    public function getCustomerReference()
     {
-        $url = 'http://wsr.brt.it:10041/web/GetIdSpedizioneByRMNService/GetIdSpedizioneByRMN?wsdl';
-        $client = new SoapClient($url);
+        return $this->customer_reference;
+    }
+    
+    /**
+     * Seek for delivered event and returns event
+     * EVENT:
+     *      ->DATA
+     *      ->DESCRIZIONE
+     *      ->FILIALE
+     *      ->ID
+     *      ->ORA
+     *      ->REFERENCE
+     *      ->TRACKING_ID
+     * @author Massimiliano Palermo <maxx.palermo@gmail.com>
+     * @return mixed event or false
+     */
+    public function seekForDeliveredState($reference)
+    {
+        if(!$this->getTrackingByRMN($reference)){
+            return false;
+        }
         
+        if(!$this->getTrackingInfoByTrackingId($this->tracking_id)) {
+            return false;
+        }
         
-        /**
-         * <xs:complexType name="getidspedizionebyrmnInput">
-         * <xs:sequence>
-         * <xs:element name="CLIENTE_ID" type="xs:decimal"/>
-         * <xs:element name="RIFERIMENTO_MITTENTE_NUMERICO" type="xs:decimal"/>
-         * </xs:sequence>
-         * </xs:complexType>
-         */
+        if (empty($this->result->ESITO) || $this->result->ESITO<0) {
+            return false;
+        }
         
-        $request = new stdClass();
-        $request->CLIENTE_ID = 1690519;
-        $request->RIFERIMENTO_MITTENTE_NUMERICO = 10001093;
-        $functions = $client->__getFunctions();
-        $result = $client->getidspedizionebyrmn(array('arg0' => $request));
+        $events = $this->result->LISTA_EVENTI;
+        foreach ($events as $event)
+        {
+            $evt = $event->EVENTO;
+            if($evt->DESCRIZIONE=='CONSEGNATA') {
+                $evt->REFERENCE = $reference;
+                $evt->TRACKING_ID = $this->tracking_id;
+                return $evt;
+            }
+        }
         
-        $url2 = 'http://wsr.brt.it:10041/web/BRT_TrackingByBRTshipmentIDService/BRT_TrackingByBRTshipmentID?wsdl';
-        $client2 = new SoapClient($url2);
-        $request2 = new stdClass();
-        $request2->LINGUA_ISO639_ALPHA2 = '';
-        $request2->SPEDIZIONE_ANNO = '';
-        $request2->SPEDIZIONE_BRT_ID = '';
-        
-        $functions2 = $client2->__getFunctions();
-        $result2 = $client2->brt_trackingbybrtshipmentid(array('arg0' => $request2));
-        
-        classMpLogger::add(print_r($result, 1));
-        classMpLogger::add(print_r($functions2, 1));
-        classMpLogger::add(print_r($result2, 1));
-        
-        
-        return array($functions,$result,$functions2,$result2);
+        return false;
     }
 }

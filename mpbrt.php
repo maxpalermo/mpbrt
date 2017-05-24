@@ -146,21 +146,35 @@ class MpBrt extends Module
     public function hookDisplayAdminOrder($params)
     {
         classMpLogger::clear();
-        classMpBrtAutoload::register();
         
         $smarty = Context::getContext()->smarty;
         
-        $id_customer = ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $customer_id = (int)ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
+        
         $id_order = (int)Tools::getValue('id_order');
-        $soap = new classMpSoap($id_customer, $this);
-        //$soap->getOrderHistory('10001093');
-        $soap->request();
-        $bolla = $soap->getBolla();
-        if(!is_object($bolla)) {
-            $smarty->assign('events', array());
-        } else {
-            $smarty->assign('events', $bolla->getEventi());
+        $order = new OrderCore($id_order);
+        if($order->id_carrier!=$id_carrier_display) {
+            return false;
         }
+        $reference = $order->reference;
+        $soap = new classMpSoap($customer_id, $this);
+        $soap->getOrderHistory((int)$reference);
+        $bolla = $soap->getBolla();
+        if (!$bolla) {
+            $smarty->assign('title_box', $soap->getResultMessage());
+            $smarty->assign('title_code', $soap->getResultCode());
+            $smarty->assign('events', array());
+            $smarty->assign('brt_customer_reference', $soap->getCustomerReference());
+            $smarty->assign('brt_tracking_id', '');
+        } else {
+            $smarty->assign('title_box', '');
+            $smarty->assign('title_code', 0);
+            $smarty->assign('events', $bolla->getEventi());
+            $smarty->assign('brt_customer_reference', $soap->getCustomerReference());
+            $smarty->assign('brt_tracking_id', $soap->getTrackingId());
+        }
+        
         $smarty->assign('soap', $soap);
         $smarty->assign('id_order', $id_order);
         
@@ -169,23 +183,96 @@ class MpBrt extends Module
     
     public function hookDisplayBackOfficeHeader($params)
     {
-        $this->context->controller->addCSS(_MPBRT_CSS_URL_ . 'admin.css');
-        $this->context->controller->addJS(_MPBRT_JS_URL_ . 'label.js');
+        //$this->context->controller->addCSS(_MPBRT_CSS_URL_ . 'admin.css');
+        //$this->context->controller->addCSS(_MPBRT_CSS_URL_ . 'getContent.css');
+        //$this->context->controller->addJS(_MPBRT_JS_URL_ . 'label.js');
     }
     
     public function getContent()
     {
         classMpLogger::clear();
-        classMpBrtAutoload::register();
         
         $this->smarty = Context::getContext()->smarty;
-        $controller = $this->getHookController('getContent');
-        return $controller->run();
+        $message = $this->postProcess();
+        return $message . $this->renderForm();
     }
     
-    public function setMedia()
+    public function renderForm()
     {
+        $customer_id = (int)ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
+        $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
+        $id_tracking_order = (int)ConfigurationCore::get('MP_BRT_ID_TRACKING_ORDER');
+        $id_delivered_order = (int)ConfigurationCore::get('MP_BRT_ID_DELIVERED_ORDER');
         
+        $this->smarty->assign('brt_customer_id', $customer_id);
+        $this->smarty->assign('brt_carrier_display_list', implode(PHP_EOL, $this->getCarriers($id_carrier_display)));
+        $this->smarty->assign('brt_order_tracking_list', implode(PHP_EOL, $this->getOrderStates($id_tracking_order)));
+        $this->smarty->assign('brt_order_delivered_list', implode(PHP_EOL, $this->getOrderStates($id_delivered_order)));
+        $template  = $this->display(__FILE__, 'getContent.tpl');
+        return $template;
+    }
+    
+    private function getCarriers($id_carrier)
+    {
+        $carriers = CarrierCore::getCarriers(Context::getContext()->language->id);
+        $list = array();
+        foreach($carriers as $carrier)
+        {
+            if($carrier['id_carrier']==$id_carrier) {
+                $selected = " selected='selected' ";
+            } else {
+                $selected = "";
+            }
+            $option = "<option value='"
+                    . $carrier['id_carrier'] 
+                    . "'"
+                    . $selected
+                    . ">"
+                    . $carrier['name']
+                    . "</option>";
+            $list[] = $option;
+        }
+        return $list;
+    }
+    
+    private function getOrderStates($id_order_state)
+    {
+        $states = OrderStateCore::getOrderStates(Context::getContext()->language->id);
+        $list = array();
+        foreach($states as $state)
+        {
+            if($state['id_order_state']==$id_order_state) {
+                $selected = " selected='selected' ";
+            } else {
+                $selected = "";
+            }
+            $option = "<option value='"
+                    . $state['id_order_state'] 
+                    . "'"
+                    . $selected
+                    . ">"
+                    . $state['name']
+                    . "</option>";
+            $list[] = $option;
+        }
+        return $list;
+    }
+    
+    public function postProcess()
+    {
+        if(Tools::isSubmit('submit_customer_save')) {
+            $customer_id = (int)Tools::getValue('input_customer_id', 0);
+            $id_carrier_display = (int)Tools::getValue('input_select_carrier_display', 0);
+            $id_tracking_order = (int)Tools::getValue('input_select_state_tracking', 0);
+            $id_delivered_order = (int)Tools::getValue('input_select_state_delivered', 0);
+            ConfigurationCore::updateValue('MP_BRT_CUSTOMER_ID', $customer_id);
+            ConfigurationCore::updateValue('MP_BRT_ID_CARRIER_DISPLAY', $id_carrier_display);
+            ConfigurationCore::updateValue('MP_BRT_ID_TRACKING_ORDER', $id_tracking_order);
+            ConfigurationCore::updateValue('MP_BRT_ID_DELIVERED_ORDER', $id_delivered_order);
+            return $this->displayConfirmation($this->l('Configuration saved successfully.', 'mpbrt'));
+        } else {
+            return '';
+        }
     }
     
     public function getHookController($hook_name)

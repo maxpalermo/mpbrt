@@ -41,16 +41,16 @@ class classBrtDatiSpedizione {
     
     public function __construct($spedizione) {
         $this->cod_filiale_arrivo = $spedizione->COD_FILIALE_ARRIVO;
-        $this->descrizione_1 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE_1;
-        $this->descrizione_2 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE_2;
+        $this->descrizione_1 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE1;
+        $this->descrizione_2 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE2;
         $this->filiale_arrivo = $spedizione->FILIALE_ARRIVO;
         $this->filiale_arrivo_url = $spedizione->FILIALE_ARRIVO_URL;
         $this->porto = $spedizione->PORTO;
         $this->servizio = $spedizione->SERVIZIO;
         $this->data = $spedizione->SPEDIZIONE_DATA;
         $this->id = $spedizione->SPEDIZIONE_ID;
-        $this->stato_1 = $spedizione->STATO_SPED_PARTE_1;
-        $this->stato_2 = $spedizione->STATO_SPED_PARTE_2;
+        $this->stato_1 = $spedizione->STATO_SPED_PARTE1;
+        $this->stato_2 = $spedizione->STATO_SPED_PARTE2;
         $this->tipo_porto = $spedizione->TIPO_PORTO;
         $this->tipo_servizio = $spedizione->TIPO_SERVIZIO;
     }

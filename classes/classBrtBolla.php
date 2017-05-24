@@ -53,7 +53,7 @@ class classBrtBolla {
         $this->esito = $result->ESITO;
         $this->eventi = $this->setEventi($result->LISTA_EVENTI);
         $this->risposta_timestamp = $result->RISPOSTA_TIMESTAMP;
-        $this->versione = $result->versione;
+        $this->versione = $result->VERSIONE;
     }
     
     private function setEventi($eventi)
@@ -67,8 +67,23 @@ class classBrtBolla {
         return $array;
     }
     
-    public function getEventi()
+    public function getEventi($esito = 0)
     {
-        return $this->eventi;
+        if($esito==0) {
+            return $this->eventi;
+        } else {
+            $evt = new stdClass();
+            
+            $evt->data = date('d.m.Y');
+            $evt->descrizione = $this->getEsitoMessage($esito);
+            $evt->filiale = '';
+            $evt->id = '';
+            $evt->ora = date('h:i:s');
+            
+            $class = new stdClass();
+            $class->EVENTO = $evt;
+            return array($class);
+        }
+        
     }
 }

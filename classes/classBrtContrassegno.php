@@ -31,10 +31,10 @@ class classBrtContrassegno {
     private $particolarita;
     
     public function __construct($contrassegno) {
-        $this->divisa = $contrassegno->DIVISA;
-        $this->importo = $contrassegno->IMPORTO;
-        $this->incasso = $contrassegno->INCASSO;
-        $this->particolarita = $contrassegno->PARTICOLARITA;
+        $this->divisa = $contrassegno->CONTRASSEGNO_DIVISA;
+        $this->importo = $contrassegno->CONTRASSEGNO_IMPORTO;
+        $this->incasso = $contrassegno->CONTRASSEGNO_INCASSO;
+        $this->particolarita = $contrassegno->CONTRASSEGNO_PARTICOLARITA;
     }
     
     function getDivisa() {

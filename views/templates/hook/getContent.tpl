@@ -22,6 +22,12 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of mpSOFT
 *}
+<style>
+    .form-wrapper
+    {
+        margin-bottom: 15px;
+    }
+</style>
 
 <div id='cover-wait-operations'></div>
 
@@ -41,8 +47,41 @@
                     name="input_customer_id"
                     class="input fixed-width-lg" 
                     onfocus='javascript:$(this).select();'
-                    value="{$brt_customer_id}"
+                    value='{$brt_customer_id}'
                     >
+            </div>
+            <div class="form-wrapper">
+                <label class="control-label col-lg-3 ">{l s='Select Bartolini carrier' mod='mpbrt'}</label>
+                <select 
+                    id="input_select_carrier_display" 
+                    name="input_select_carrier_display"
+                    class="input fixed-width-lg" 
+                    >
+                    <option value="0">{l s='All' mod='mpbrt'}</option>
+                    {$brt_carrier_display_list}
+                </select>
+            </div>
+                <div class="form-wrapper">
+                <label class="control-label col-lg-3 ">{l s='Select State to change when set tracking id' mod='mpbrt'}</label>
+                <select 
+                    id="input_select_state_tracking" 
+                    name="input_select_state_tracking"
+                    class="input fixed-width-lg" 
+                    >
+                    <option value="0">{l s='None' mod='mpbrt'}</option>
+                    {$brt_order_tracking_list}
+                </select>
+            </div>
+            <div class="form-wrapper">
+                <label class="control-label col-lg-3 ">{l s='Order state to change when delivered' mod='mpbrt'}</label>
+                <select 
+                    id="input_select_state_delivered" 
+                    name="input_select_state_delivered"
+                    class="input fixed-width-lg" 
+                    >
+                    <option value="0">{l s='None' mod='mpbrt'}</option>
+                    {$brt_order_delivered_list}
+                </select>
             </div>
         </div>
                 

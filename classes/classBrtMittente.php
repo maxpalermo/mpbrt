@@ -37,7 +37,7 @@ class classBrtMittente {
         $this->codice = $mitt->CODICE;
         $this->indirizzo = $mitt->INDIRIZZO;
         $this->localita = $mitt->LOCALITA;
-        $this->ragione_sociale = $mitt->RAGINE_SOCIALE;
+        $this->ragione_sociale = $mitt->RAGIONE_SOCIALE;
         $this->sigla_area = $mitt->SIGLA_AREA;
     }
     

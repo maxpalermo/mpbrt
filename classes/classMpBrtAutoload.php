@@ -24,16 +24,9 @@
  *  International Registered Trademark & Property of mpSOFT
  */
 
-class classMpBrtAutoload {
-    public static function register()
-    {
-        spl_autoload_register(
-                function($classname) {
-                    if(!class_exists($classname)) {
-                        require (_MPBRT_CLASSES_ . $classname . ".php");
-                    }
-                }
-        );
-    }
+$classes = glob(dirname(__FILE__) . DIRECTORY_SEPARATOR . "*.php");
+foreach($classes as $class)
+{
+    require_once $class;
 }
 

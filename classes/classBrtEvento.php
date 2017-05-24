@@ -32,11 +32,12 @@ class classBrtEvento {
     private $ora;
     
     public function __construct($evento) {
-        $this->data = $evento->DATA;
-        $this->descrizione = $evento->DESCRIZIONE;
-        $this->filiale = $evento->FILIALE;
-        $this->id = $evento->ID;
-        $this->ora = $evento->ORA;
+        $data = $evento->EVENTO;
+        $this->data = $data->DATA;
+        $this->descrizione = $data->DESCRIZIONE;
+        $this->filiale = $data->FILIALE;
+        $this->id = $data->ID;
+        $this->ora = $data->ORA;
     }
     
     function getData() {

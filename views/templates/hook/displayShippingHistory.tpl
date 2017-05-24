@@ -28,6 +28,17 @@
         <div class="panel-heading">
             <i class="icon icon-truck"></i>
             {l s='Carrier history' mod='mpbrt'}
+            {if !empty($title_box)}
+                <span style='color: #ad2b34; padding-left: 10px; font-weight: bold;'>
+                    <i class='icon icon-warning'></i>
+                    {$title_box} ({$title_code})
+                </span>
+            {/if}
+        </div>
+        <div class='panel-info'>
+            <span>{l s='Customer reference:' mod='mpbrt'} <strong>{$brt_customer_reference}</strong></span>
+            <br>
+            <span>{l s='Tracking id:' mod='mpbrt'} <strong>{$brt_tracking_id}</strong></span>
         </div>
         <div class='panel-body'>
             <table class="table">
@@ -42,19 +53,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {foreach $eventi as $evento}
+                    {foreach $events as $evento}
                         <tr>
                             <td><i class='icon icon-truck'></i></td>
-                            <td><span>{$evento->ID}</span></td>
-                            <td><span>{$evento->DESCRIZIONE}</span></td>
-                            <td><span>{$evento->DATA}</span></td>
-                            <td><span>{$evento->ORA}</span></td>
-                            <td><span>{$evento->FILIALE}</span></td>
+                            <td><span>{$evento->getId()}</span></td>
+                            <td><span>{$evento->getDescrizione()}</span></td>
+                            <td><span>{$evento->getData()}</span></td>
+                            <td><span>{$evento->getOra()}</span></td>
+                            <td><span>{$evento->getFiliale()}</span></td>
                         </tr>
                     {/foreach}
                 </tbody>
             </table>
-
         </div>
         
         <div class="panel-footer">
@@ -75,6 +85,11 @@
     <br>
     <span>MESSAGGIO: {$soap->getResultMessage()}</span>
     <pre>
+        <strong>RESULT</strong>
         {$soap->getResult()|print_r}
+    </pre>
+    <pre>
+        <strong>EVENTS</strong>
+        {$events|print_r}
     </pre>
 </div>
