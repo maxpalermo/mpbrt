@@ -61,8 +61,34 @@
                     {$brt_carrier_display_list}
                 </select>
             </div>
-                <div class="form-wrapper">
-                <label class="control-label col-lg-3 ">{l s='Select State to change when set tracking id' mod='mpbrt'}</label>
+            <div class="form-wrapper">
+                <label class="control-label col-lg-3 ">{l s='Select Order States to skip' mod='mpbrt'}</label>
+                <div class='panel-body' style='height: 12em; overflow-y: auto;'>
+                    <table class='table table-data-sheet' style='display: block;'>
+                        <tbody>
+                            {foreach $brt_order_skipped as $order_state}
+                            <tr>
+                                <td>
+                                    <input 
+                                        type="checkbox" 
+                                        name="input_checkbox_skip_state[]" 
+                                        value="{$order_state['id_order_state']}" 
+                                        {if $order_state['checked']}
+                                            checked="checked"
+                                        {/if}
+                                         />
+                                </td>
+                                <td>
+                                    {$order_state['name']}
+                                </td>
+                            </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-wrapper">
+                <label class="control-label col-lg-3">{l s='Select State to change when set tracking id' mod='mpbrt'}</label>
                 <select 
                     id="input_select_state_tracking" 
                     name="input_select_state_tracking"
@@ -83,6 +109,7 @@
                     {$brt_order_delivered_list}
                 </select>
             </div>
+            {$input_switch_display_error}
             <div class="form-wrapper">
                 <label class="control-label col-lg-3 ">{l s='Select Customer reference' mod='mpbrt'}</label>
                 <select 
@@ -90,16 +117,16 @@
                     name="input_select_customer_reference"
                     class="input fixed-width-lg" 
                     >
-                    <option value="id_order" {if $brt_customer_reference=='id_order'}selected='selected'{/if}>
+                    <option value="id_order" {if $brt_customer_reference=='id_order'} selected='selected' {/if}>
                         {l s='By Order id' mod='mpbrt'}
                     </option>
-                    <option value="reference" {if $brt_customer_reference=='reference'}selected='selected'{/if}>
+                    <option value="reference" {if $brt_customer_reference=='reference'} selected='selected' {/if}>
                         {l s='By Order reference' mod='mpbrt'}
                     </option>
                 </select>
             </div>
         </div>
-                
+                    
         <div class="panel-footer">
             <button type="submit" value="1" id="submit_customer_save" name="submit_customer_save" class="btn btn-default pull-right">
                 <i class="process-icon-save"></i> 
@@ -115,27 +142,6 @@
        $('#cover-wait-operations').fadeOut();
        $('#input_paypal_switch_off').click();
     }); // end onload function
-    
-    function switch_btn(value)
-    {
-        if (value==1) {
-            switch_on();
-        } else {
-            switch_off();
-        }
-    }
-    
-    function switch_off()
-    {
-        log('switch off');
-        $("#input_paypal_switch_val").attr('switch','0');
-    }
-    
-    function switch_on()
-    {
-        log('switch on');
-        $("#input_paypal_switch_val").attr('switch', '1');
-    }
     
     function log(logger)
     {

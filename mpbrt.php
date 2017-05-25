@@ -199,17 +199,26 @@ class MpBrt extends Module
     
     public function renderForm()
     {
+        
+        
         $customer_id = (int)ConfigurationCore::get('MP_BRT_CUSTOMER_ID');
         $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
         $id_tracking_order = (int)ConfigurationCore::get('MP_BRT_ID_TRACKING_ORDER');
         $id_delivered_order = (int)ConfigurationCore::get('MP_BRT_ID_DELIVERED_ORDER');
         $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
+        $switch_display_error = (int)ConfigurationCore::get('MP_BRT_SWITCH_DISPLAY_ERROR');
+        
+        $this->addSwitch('input_switch_display_error', 
+                $this->l('Show Tracking error?', 'mpbrt'), 
+                $this->smarty, 
+                $switch_display_error);
         
         $this->smarty->assign('brt_customer_id', $customer_id);
         $this->smarty->assign('brt_carrier_display_list', implode(PHP_EOL, $this->getCarriers($id_carrier_display)));
         $this->smarty->assign('brt_order_tracking_list', implode(PHP_EOL, $this->getOrderStates($id_tracking_order)));
         $this->smarty->assign('brt_order_delivered_list', implode(PHP_EOL, $this->getOrderStates($id_delivered_order)));
-        $this->smarty->assign('brt_customer_reference', implode(PHP_EOL, $this->getOrderStates($id_customer_reference)));
+        $this->smarty->assign('brt_customer_reference', $id_customer_reference);
+        $this->smarty->assign('brt_order_skipped',$this->getArrayOrderStates());
         $template  = $this->display(__FILE__, 'getContent.tpl');
         return $template;
     }
@@ -260,6 +269,23 @@ class MpBrt extends Module
         return $list;
     }
     
+    private function getArrayOrderStates()
+    {
+        $order_states = OrderStateCore::getOrderStates(Context::getContext()->language->id);
+        $order_checked = explode(",",ConfigurationCore::get('MP_BRT_SKIP_STATES'));
+        
+        foreach($order_states as &$order_state)
+        {
+            if(in_array($order_state['id_order_state'], $order_checked)) {
+                $order_state['checked']=true;
+            } else {
+                $order_state['checked']=false;
+            }
+        }
+        
+        return $order_states;
+    }
+    
     public function postProcess()
     {
         if(Tools::isSubmit('submit_customer_save')) {
@@ -268,11 +294,16 @@ class MpBrt extends Module
             $id_tracking_order = (int)Tools::getValue('input_select_state_tracking', 0);
             $id_delivered_order = (int)Tools::getValue('input_select_state_delivered', 0);
             $id_customer_reference = Tools::getValue('input_select_customer_reference', 'reference');
+            $switch_display_error = (int)Tools::getValue('input_switch_display_error_val', 0);
+            $skip_states = implode(",",Tools::getValue('input_checkbox_skip_state'));
+            
             ConfigurationCore::updateValue('MP_BRT_CUSTOMER_ID', $customer_id);
             ConfigurationCore::updateValue('MP_BRT_ID_CARRIER_DISPLAY', $id_carrier_display);
             ConfigurationCore::updateValue('MP_BRT_ID_TRACKING_ORDER', $id_tracking_order);
             ConfigurationCore::updateValue('MP_BRT_ID_DELIVERED_ORDER', $id_delivered_order);
             ConfigurationCore::updateValue('MP_BRT_CUSTOMER_REFERENCE', $id_customer_reference);
+            ConfigurationCore::updateValue('MP_BRT_SKIP_STATES', $skip_states);
+            ConfigurationCore::updateValue('MP_BRT_SWITCH_DISPLAY_ERROR', $switch_display_error);
             return $this->displayConfirmation($this->l('Configuration saved successfully.', 'mpbrt'));
         } else {
             return '';
@@ -292,5 +323,15 @@ class MpBrt extends Module
 
         // Return the controller
         return $controller;
+    }
+    
+    public function addSwitch($name, $label, $smarty, $value)
+    {
+        $switch = new stdClass();
+        $switch->label = $label;
+        $switch->name = $name;
+        $switch->value = $value;
+        $smarty->assign('switch', $switch);
+        $smarty->assign($name, $smarty->fetch(_MPBRT_TEMPLATES_HOOK_ . 'switch.tpl'));
     }
 }

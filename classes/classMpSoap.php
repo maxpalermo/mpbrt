@@ -38,13 +38,17 @@ class classMpSoap extends ModuleCore{
     private $module;
     private $debug;
     private $tracking_id;
+    private $id_customer_reference;
+    private $switch_display_error;
     
-    public function __construct($customer_id, $module) {
-        $this->module = $module;
+    public function __construct($customer_id) {
+        parent::__construct();
+        
         $this->bolla = false;
         $this->customer_id = $customer_id;
-        $this->module = $module;
         $this->debug = true;
+        $this->id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
+        $this->switch_display_error = ConfigurationCore::get('MP_BRT_SWITCH_DISPLAY_ERROR');
     }
     
     /**
@@ -253,13 +257,15 @@ class classMpSoap extends ModuleCore{
         classMpLogger::add('* START FUNCTION SEEK STATE *');
         classMpLogger::add('*****************************');
         
-        $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
+        
         $order = new OrderCore($id_order);
         $state = new OrderStateCore($order->current_state);
-        if($id_customer_reference=='reference') {
+        if($this->id_customer_reference=='reference') {
             $reference = (int)$order->reference;
+            classMpLogger::add('Search by reference: ' . $reference);
         } else {
             $reference = (int)$order->id;
+            classMpLogger::add('Search by order id: ' . $reference);
         }
         
         //Get Tracking ID
