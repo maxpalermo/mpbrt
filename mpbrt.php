@@ -203,11 +203,13 @@ class MpBrt extends Module
         $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
         $id_tracking_order = (int)ConfigurationCore::get('MP_BRT_ID_TRACKING_ORDER');
         $id_delivered_order = (int)ConfigurationCore::get('MP_BRT_ID_DELIVERED_ORDER');
+        $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
         
         $this->smarty->assign('brt_customer_id', $customer_id);
         $this->smarty->assign('brt_carrier_display_list', implode(PHP_EOL, $this->getCarriers($id_carrier_display)));
         $this->smarty->assign('brt_order_tracking_list', implode(PHP_EOL, $this->getOrderStates($id_tracking_order)));
         $this->smarty->assign('brt_order_delivered_list', implode(PHP_EOL, $this->getOrderStates($id_delivered_order)));
+        $this->smarty->assign('brt_customer_reference', implode(PHP_EOL, $this->getOrderStates($id_customer_reference)));
         $template  = $this->display(__FILE__, 'getContent.tpl');
         return $template;
     }
@@ -265,10 +267,12 @@ class MpBrt extends Module
             $id_carrier_display = (int)Tools::getValue('input_select_carrier_display', 0);
             $id_tracking_order = (int)Tools::getValue('input_select_state_tracking', 0);
             $id_delivered_order = (int)Tools::getValue('input_select_state_delivered', 0);
+            $id_customer_reference = Tools::getValue('input_select_customer_reference', 'reference');
             ConfigurationCore::updateValue('MP_BRT_CUSTOMER_ID', $customer_id);
             ConfigurationCore::updateValue('MP_BRT_ID_CARRIER_DISPLAY', $id_carrier_display);
             ConfigurationCore::updateValue('MP_BRT_ID_TRACKING_ORDER', $id_tracking_order);
             ConfigurationCore::updateValue('MP_BRT_ID_DELIVERED_ORDER', $id_delivered_order);
+            ConfigurationCore::updateValue('MP_BRT_CUSTOMER_REFERENCE', $id_customer_reference);
             return $this->displayConfirmation($this->l('Configuration saved successfully.', 'mpbrt'));
         } else {
             return '';

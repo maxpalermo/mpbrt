@@ -78,7 +78,7 @@ class classBrtBolla {
             $evt->descrizione = $this->getEsitoMessage($esito);
             $evt->filiale = '';
             $evt->id = '';
-            $evt->ora = date('h:i:s');
+            $evt->ora = date('h:i');
             
             $class = new stdClass();
             $class->EVENTO = $evt;

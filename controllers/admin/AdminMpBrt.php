@@ -64,6 +64,7 @@ class AdminMpBrtController extends ModuleAdminController {
         $id_carrier_display = (int)ConfigurationCore::get('MP_BRT_ID_CARRIER_DISPLAY');
         $id_tracking_order = (int)ConfigurationCore::get('MP_BRT_ID_TRACKING_ORDER');
         $id_delivered_order = (int)ConfigurationCore::get('MP_BRT_ID_DELIVERED_ORDER');
+        $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
         
         $soap = new classMpSoap($customer_id, Context::getContext()->controller);
         
@@ -71,7 +72,8 @@ class AdminMpBrtController extends ModuleAdminController {
         $sql = new DbQueryCore();
         $sql    ->select('id_order')
                 ->select('reference')
-                ->from('orders');
+                ->from('orders')
+                ->orderby('date_add DESC');
         if($id_carrier_display!=0) {
             $sql->where('id_carrier = ' . pSQL($id_carrier_display));
         }
@@ -82,9 +84,11 @@ class AdminMpBrtController extends ModuleAdminController {
         $orders = $db->executeS($sql);
         $rows = array();
         
+        $i=0;
         foreach($orders as $order)
         {
-            $evt = $soap->seekForDeliveredState((int)$order['reference']);
+            $i++; if($i==20) {break;}
+            $evt = $soap->seekForDeliveredState((int)$order['reference'], (int)$order['id_order']);
             if($evt!==false) {
                 $row = $this->buildStatusRow($evt);
                 $rows[] = $row;
@@ -94,9 +98,10 @@ class AdminMpBrtController extends ModuleAdminController {
                 $row->DESCRIZIONE=$this->getResultMessage($soap->getResultCode());
                 $row->FILIALE='';
                 $row->ID=$soap->getResultCode();
-                $row->ORA=date('h:i:s');
+                $row->ORA=date('h:i');
                 $row->REFERENCE=$order['reference'];
                 $row->TRACKING_ID='ERROR';
+                $row->STATE='';
                 $tr = $this->buildStatusRow($row);
                 $rows[] = $tr;
             }
@@ -127,6 +132,7 @@ class AdminMpBrtController extends ModuleAdminController {
                 . "<td>" . $row->FILIALE . "</td>"
                 . "<td>" . $row->REFERENCE . "</td>"
                 . "<td>" . $row->TRACKING_ID . "</td>"
+                . "<td>" . $row->STATE . "</td>"
                 ."<tr>";
         return $tr;
     }

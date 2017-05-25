@@ -83,6 +83,21 @@
                     {$brt_order_delivered_list}
                 </select>
             </div>
+            <div class="form-wrapper">
+                <label class="control-label col-lg-3 ">{l s='Select Customer reference' mod='mpbrt'}</label>
+                <select 
+                    id="input_select_customer_reference" 
+                    name="input_select_customer_reference"
+                    class="input fixed-width-lg" 
+                    >
+                    <option value="id_order" {if $brt_customer_reference=='id_order'}selected='selected'{/if}>
+                        {l s='By Order id' mod='mpbrt'}
+                    </option>
+                    <option value="reference" {if $brt_customer_reference=='reference'}selected='selected'{/if}>
+                        {l s='By Order reference' mod='mpbrt'}
+                    </option>
+                </select>
+            </div>
         </div>
                 
         <div class="panel-footer">

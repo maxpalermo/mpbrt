@@ -47,6 +47,7 @@ class classMpLogger {
         fwrite($handle,$log);
         fwrite($handle,PHP_EOL);
         fclose($handle);
+        chmod($filename, 0777);
     }
     
     public static function clear()

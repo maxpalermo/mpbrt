@@ -29,7 +29,7 @@ if(class_exists('classMpSoap')) {
     return false;
 }
 
-class classMpSoap {
+class classMpSoap extends ModuleCore{
     
     private $result;
     private $bolla;
@@ -79,35 +79,36 @@ class classMpSoap {
      */
     public function getResultMessage()
     {
+        $translate = new MpBrt();
         $message = "";
         
         if(!empty($this->result) && !empty($this->result->ESITO))
         {
             switch ((int)$this->result->ESITO) {
                 case 0:
-                    $message = Context::getContext()->controller->l('OK','classMpSoap');
+                    $message = $translate->l('OK','classMpSoap');
                     break;
                 case -1:
-                    $message = Context::getContext()->controller->l('UNKNOWN ERROR','classMpSoap');
+                    $message = $translate->l('UNKNOWN ERROR','classMpSoap');
                     break;
                 case -3:
-                    $message = Context::getContext()->controller->l('ERROR CONNECTING DATABASE', 'classMpSoap');
+                    $message = $translate->l('ERROR CONNECTING DATABASE', 'classMpSoap');
                     break;
                 case -20:
-                    $message = Context::getContext()->controller->l('NO SENDER RECEIVED', 'classMpSoap');
+                    $message = $translate->l('NO SENDER RECEIVED', 'classMpSoap');
                     break;
                 case -21:
-                    $message = Context::getContext()->controller->l('CUSTOMER NOT VALID', 'classMpSoap');
+                    $message = $translate->l('CUSTOMER NOT VALID', 'classMpSoap');
                     break;
                 case -11:
-                    $message = Context::getContext()->controller->l('SHIPPING NOT FOUND', 'classMpSoap');
+                    $message = $translate->l('SHIPPING NOT FOUND', 'classMpSoap');
                     break;
                 case -22:
-                    $message = Context::getContext()->controller->l('MORE THAN ONE SHIPPING FOUND', 'classMpSoap');
+                    $message = $translate->l('MORE THAN ONE SHIPPING FOUND', 'classMpSoap');
                     break;
                 default:
                     if ((int)$this->result->ESITO >0) {
-                        $message = Context::getContext()->controller->l('WARNINGS DURING FUNCTION CALL', 'classMpSoap');
+                        $message = $translate->l('WARNINGS DURING FUNCTION CALL', 'classMpSoap');
                     } else {
                         $message = '';
                     }
@@ -198,6 +199,7 @@ class classMpSoap {
         try {
             $result = $client->brt_trackingbybrtshipmentid(array('arg0' => $request));
         } catch (Exception $exc) {
+            classMpLogger::add('ERROR DURING FUNCTION CALL');
             classMpLogger::add($exc->getMessage());
             return false;
         }
@@ -208,7 +210,7 @@ class classMpSoap {
             classMpLogger::add('GET TRACKING INFO');
             classMpLogger::add('TRACKING ID: ' . $tracking_id);
             classMpLogger::add("ESITO: " . $this->getResultMessage());
-            classMpLogger::add(print_r($result, 1));
+            //classMpLogger::add(print_r($result, 1));
         }
         
         if($this->result->ESITO==0) {
@@ -245,31 +247,46 @@ class classMpSoap {
      * @author Massimiliano Palermo <maxx.palermo@gmail.com>
      * @return mixed event or false
      */
-    public function seekForDeliveredState($reference)
+    public function seekForDeliveredState($reference, $id_order)
     {
-        if(!$this->getTrackingByRMN($reference)){
+        classMpLogger::add('*****************************');
+        classMpLogger::add('* START FUNCTION SEEK STATE *');
+        classMpLogger::add('*****************************');
+        
+        $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
+        $order = new OrderCore($id_order);
+        $state = new OrderStateCore($order->current_state);
+        if($id_customer_reference=='reference') {
+            $reference = (int)$order->reference;
+        } else {
+            $reference = (int)$order->id;
+        }
+        
+        //Get Tracking ID
+        if($this->getTrackingByRMN($reference)===false){
+            classMpLogger::add('getTrackingByRMN(' . $reference . ') failed');
             return false;
         }
         
-        if(!$this->getTrackingInfoByTrackingId($this->tracking_id)) {
+        //Get Tracking Info
+        if($this->getTrackingInfoByTrackingId($this->tracking_id)===false) {
+            classMpLogger::add('getTrackingInfoByTrackingId(' . $this->tracking_id . ') failed');
             return false;
         }
         
-        if (empty($this->result->ESITO) || $this->result->ESITO<0) {
+        if (!isset($this->result->ESITO) || $this->result->ESITO<0) {
+            classMpLogger::add('ESITO returns ' . $this->result->ESITO);
             return false;
         }
         
+        //Get first event to show
+        //evento ->DESCRIZIONE
         $events = $this->result->LISTA_EVENTI;
-        foreach ($events as $event)
-        {
-            $evt = $event->EVENTO;
-            if($evt->DESCRIZIONE=='CONSEGNATA') {
-                $evt->REFERENCE = $reference;
-                $evt->TRACKING_ID = $this->tracking_id;
-                return $evt;
-            }
-        }
-        
-        return false;
+        $event = $events[0];
+        $evt = $event->EVENTO;
+        $evt->REFERENCE = $reference;
+        $evt->TRACKING_ID = $this->tracking_id;
+        $evt->STATE = $state->name[ContextCore::getContext()->language->id];
+        return $evt;
     }
 }
