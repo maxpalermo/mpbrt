@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -25,23 +24,23 @@
  *  International Registered Trademark & Property of mpSOFT
  */
 
-if(class_exists('classMpSoap')) {
+if (class_exists('classMpSoap')) {
     return false;
 }
 
-class classMpSoap extends ModuleCore{
-    
+class ClassMpSoap extends ModuleCore
+{
     private $result;
     private $bolla;
     private $customer_id;
     private $customer_reference;
-    private $module;
     private $debug;
     private $tracking_id;
     private $id_customer_reference;
     private $switch_display_error;
     
-    public function __construct($customer_id) {
+    public function __construct($customer_id)
+    {
         parent::__construct();
         
         $this->bolla = false;
@@ -57,7 +56,7 @@ class classMpSoap extends ModuleCore{
      */
     public function getBolla()
     {
-        if(!empty($this->bolla)) {
+        if (!empty($this->bolla)) {
             return $this->bolla;
         } else {
             return false;
@@ -86,14 +85,13 @@ class classMpSoap extends ModuleCore{
         $translate = new MpBrt();
         $message = "";
         
-        if(!empty($this->result) && !empty($this->result->ESITO))
-        {
+        if (!empty($this->result) && !empty($this->result->ESITO)) {
             switch ((int)$this->result->ESITO) {
                 case 0:
-                    $message = $translate->l('OK','classMpSoap');
+                    $message = $translate->l('OK', 'classMpSoap');
                     break;
                 case -1:
-                    $message = $translate->l('UNKNOWN ERROR','classMpSoap');
+                    $message = $translate->l('UNKNOWN ERROR', 'classMpSoap');
                     break;
                 case -3:
                     $message = $translate->l('ERROR CONNECTING DATABASE', 'classMpSoap');
@@ -129,7 +127,7 @@ class classMpSoap extends ModuleCore{
     public function getResultCode()
     {
         if (!empty($this->result) && !empty($this->result->ESITO)) {
-           return $this->result->ESITO; 
+            return $this->result->ESITO;
         } else {
             return false;
         }
@@ -156,7 +154,7 @@ class classMpSoap extends ModuleCore{
         try {
             $client = new SoapClient($url);
         } catch (Exception $exc) {
-            classMpLogger::add($exc->getMessage());
+            ClassMpLogger::add($exc->getMessage());
             return false;
         }
         
@@ -167,7 +165,7 @@ class classMpSoap extends ModuleCore{
         try {
             $result = $client->getidspedizionebyrmn(array('arg0' => $request));
         } catch (Exception $exc) {
-            classMpLogger::add($exc->getMessage());
+            ClassMpLogger::add($exc->getMessage());
             return false;
         }
 
@@ -175,10 +173,10 @@ class classMpSoap extends ModuleCore{
         $this->result = $result->return;
         $this->tracking_id = (int)$this->result->SPEDIZIONE_ID;
         
-        if($this->debug) {
-            classMpLogger::add("CUSTOMER ID: " . $this->customer_id);
-            classMpLogger::add("ID ORDER: " . $id_order);
-            classMpLogger::add(print_r($this->result, 1));
+        if ($this->debug) {
+            ClassMpLogger::add("CUSTOMER ID: " . $this->customer_id);
+            ClassMpLogger::add("ID ORDER: " . $id_order);
+            ClassMpLogger::add(print_r($this->result, 1));
         }
     }
     
@@ -192,7 +190,7 @@ class classMpSoap extends ModuleCore{
         try {
             $client = new SoapClient($url);
         } catch (Exception $ex) {
-            classMpLogger::add($ex->getMessage());
+            ClassMpLogger::add($ex->getMessage());
             return false;
         }
         $request = new stdClass();
@@ -203,30 +201,31 @@ class classMpSoap extends ModuleCore{
         try {
             $result = $client->brt_trackingbybrtshipmentid(array('arg0' => $request));
         } catch (Exception $exc) {
-            classMpLogger::add('ERROR DURING FUNCTION CALL');
-            classMpLogger::add($exc->getMessage());
+            ClassMpLogger::add('ERROR DURING FUNCTION CALL');
+            ClassMpLogger::add($exc->getMessage());
             return false;
         }
 
         $this->result = $result->return;
         
         if ($this->debug) {
-            classMpLogger::add('GET TRACKING INFO');
-            classMpLogger::add('TRACKING ID: ' . $tracking_id);
-            classMpLogger::add("ESITO: " . $this->getResultMessage());
+            ClassMpLogger::add('GET TRACKING INFO');
+            ClassMpLogger::add('TRACKING ID: ' . $tracking_id);
+            ClassMpLogger::add("ESITO: " . $this->getResultMessage());
             //classMpLogger::add(print_r($result, 1));
         }
         
-        if($this->result->ESITO==0) {
-            $this->bolla = new classBrtBolla($this->result);
+        if ($this->result->ESITO==0) {
+            $this->bolla = new ClassBrtBolla($this->result);
         } else {
             $this->bolla = null;
         }
     }
     
-    public function getOrderHistory($id_order) {
+    public function getOrderHistory($id_order)
+    {
         $this->getTrackingByRMN($id_order);
-        if($this->getResultCode()==0) {
+        if ($this->getResultCode()==0) {
             $this->getTrackingInfoByTrackingId($this->getTrackingId());
         } else {
             return $this->result->ESITO;
@@ -253,35 +252,35 @@ class classMpSoap extends ModuleCore{
      */
     public function seekForDeliveredState($reference, $id_order)
     {
-        classMpLogger::add('*****************************');
-        classMpLogger::add('* START FUNCTION SEEK STATE *');
-        classMpLogger::add('*****************************');
+        ClassMpLogger::add('*****************************');
+        ClassMpLogger::add('* START FUNCTION SEEK STATE *');
+        ClassMpLogger::add('*****************************');
         
         
         $order = new OrderCore($id_order);
         $state = new OrderStateCore($order->current_state);
-        if($this->id_customer_reference=='reference') {
+        if ($this->id_customer_reference=='reference') {
             $reference = (int)$order->reference;
-            classMpLogger::add('Search by reference: ' . $reference);
+            ClassMpLogger::add('Search by reference: ' . $reference);
         } else {
             $reference = (int)$order->id;
-            classMpLogger::add('Search by order id: ' . $reference);
+            ClassMpLogger::add('Search by order id: ' . $reference);
         }
         
         //Get Tracking ID
-        if($this->getTrackingByRMN($reference)===false){
-            classMpLogger::add('getTrackingByRMN(' . $reference . ') failed');
+        if ($this->getTrackingByRMN($reference)===false) {
+            ClassMpLogger::add('getTrackingByRMN(' . $reference . ') failed');
             return false;
         }
         
         //Get Tracking Info
-        if($this->getTrackingInfoByTrackingId($this->tracking_id)===false) {
-            classMpLogger::add('getTrackingInfoByTrackingId(' . $this->tracking_id . ') failed');
+        if ($this->getTrackingInfoByTrackingId($this->tracking_id)===false) {
+            ClassMpLogger::add('getTrackingInfoByTrackingId(' . $this->tracking_id . ') failed');
             return false;
         }
         
         if (!isset($this->result->ESITO) || $this->result->ESITO<0) {
-            classMpLogger::add('ESITO returns ' . $this->result->ESITO);
+            ClassMpLogger::add('ESITO returns ' . $this->result->ESITO);
             return false;
         }
         

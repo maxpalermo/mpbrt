@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -25,7 +24,8 @@
  *  International Registered Trademark & Property of mpSOFT
  */
 
-class classBrtBolla {
+class ClassBrtBolla
+{
     private $assicurazione;
     private $contrassegno;
     private $dati_consegna;
@@ -40,14 +40,15 @@ class classBrtBolla {
     private $risposta_timestamp;
     private $versione;
     
-    public function __construct($result) {
-        $this->assicurazione = new classBrtAssicurazione($result->BOLLA->ASSICURAZIONE);
-        $this->contrassegno = new classBrtContrassegno($result->BOLLA->CONTRASSEGNO);
-        $this->dati_consegna = new classBrtDatiConsegna($result->BOLLA->DATI_CONSEGNA);
-        $this->dati_spedizione = new classBrtDatiSpedizione($result->BOLLA->DATI_SPEDIZIONE);
-        $this->destinatario = new classBrtDestinatario($result->BOLLA->DESTINATARIO);
-        $this->merce = new classBrtMerce($result->BOLLA->MERCE);
-        $this->mittente = new classBrtMittente($result->BOLLA->MITTENTE);
+    public function __construct($result)
+    {
+        $this->assicurazione = new ClassBrtAssicurazione($result->BOLLA->ASSICURAZIONE);
+        $this->contrassegno = new ClassBrtContrassegno($result->BOLLA->CONTRASSEGNO);
+        $this->dati_consegna = new ClassBrtDatiConsegna($result->BOLLA->DATI_CONSEGNA);
+        $this->dati_spedizione = new ClassBrtDatiSpedizione($result->BOLLA->DATI_SPEDIZIONE);
+        $this->destinatario = new ClassBrtDestinatario($result->BOLLA->DESTINATARIO);
+        $this->merce = new ClassBrtMerce($result->BOLLA->MERCE);
+        $this->mittente = new ClassBrtMittente($result->BOLLA->MITTENTE);
         $this->contatore_eventi = $result->CONTATORE_EVENTI;
         $this->contatore_note = $result->CONTATORE_NOTE;
         $this->esito = $result->ESITO;
@@ -60,7 +61,7 @@ class classBrtBolla {
     {
         $array = array();
         foreach ($eventi as $evento) {
-            $evt = new classBrtEvento($evento);
+            $evt = new ClassBrtEvento($evento);
             $array[] = $evt;
         }
         
@@ -69,7 +70,7 @@ class classBrtBolla {
     
     public function getEventi($esito = 0)
     {
-        if($esito==0) {
+        if ($esito==0) {
             return $this->eventi;
         } else {
             $evt = new stdClass();
@@ -84,6 +85,5 @@ class classBrtBolla {
             $class->EVENTO = $evt;
             return array($class);
         }
-        
     }
 }

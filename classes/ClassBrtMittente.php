@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,34 +23,53 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtMerce {
-    private $colli;
-    private $natura_merce;
-    private $peso_kg;
-    private $volume_m3;
+
+class ClassBrtMittente
+{
+    private $cap;
+    private $codice;
+    private $indirizzo;
+    private $localita;
+    private $ragione_sociale;
+    private $sigla_area;
     
-    public function __construct($merce) {
-        $this->colli = $merce->COLLI;
-        $this->natura_merce = $merce->NATURA_MERCE;
-        $this->peso_kg = $merce->PESO_KG;
-        $this->volume_m3 = $merce->VOLUME_M3;
+    public function __construct($mitt)
+    {
+        $this->cap = $mitt->CAP;
+        $this->codice = $mitt->CODICE;
+        $this->indirizzo = $mitt->INDIRIZZO;
+        $this->localita = $mitt->LOCALITA;
+        $this->ragione_sociale = $mitt->RAGIONE_SOCIALE;
+        $this->sigla_area = $mitt->SIGLA_AREA;
     }
     
-    function getColli() {
-        return $this->colli;
+    public function getCap()
+    {
+        return $this->cap;
     }
 
-    function getNaturaMerce() {
-        return $this->natura_merce;
+    public function getCodice()
+    {
+        return $this->codice;
     }
 
-    function getPesoKg() {
-        return $this->peso_kg;
+    public function getIndirizzo()
+    {
+        return $this->indirizzo;
     }
 
-    function getVolumeM3() {
-        return $this->volume_m3;
+    public function getLocalita()
+    {
+        return $this->localita;
     }
 
+    public function getRagioneSociale()
+    {
+        return $this->ragione_sociale;
+    }
 
+    public function getSiglaArea()
+    {
+        return $this->sigla_area;
+    }
 }

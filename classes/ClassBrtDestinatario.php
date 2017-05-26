@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,7 +23,9 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtDestinatario {
+
+class ClassBrtDestinatario
+{
     private $cap;
     private $indirizzo;
     private $localita;
@@ -34,7 +35,8 @@ class classBrtDestinatario {
     private $sigla_provincia;
     private $telefono_referente;
     
-    public function __construct($dest) {
+    public function __construct($dest)
+    {
         $this->cap = $dest->CAP;
         $this->indirizzo = $dest->INDIRIZZO;
         $this->localita = $dest->LOCALITA;
@@ -45,36 +47,43 @@ class classBrtDestinatario {
         $this->telefono_referente = $dest->TELEFONO_REFERENTE;
     }
     
-    function getCap() {
+    public function getCap()
+    {
         return $this->cap;
     }
 
-    function getIndirizzo() {
+    public function getIndirizzo()
+    {
         return $this->indirizzo;
     }
 
-    function getLocalita() {
+    public function getLocalita()
+    {
         return $this->localita;
     }
 
-    function getRagioneSociale() {
+    public function getRagioneSociale()
+    {
         return $this->ragione_sociale;
     }
 
-    function getReferenteConsegna() {
+    public function getReferenteConsegna()
+    {
         return $this->referente_consegna;
     }
 
-    function getSiglaNazione() {
+    public function getSiglaNazione()
+    {
         return $this->sigla_nazione;
     }
 
-    function getSiglaProvincia() {
+    public function getSiglaProvincia()
+    {
         return $this->sigla_provincia;
     }
 
-    function getTelefonoReferente() {
+    public function getTelefonoReferente()
+    {
         return $this->telefono_referente;
     }
-
 }

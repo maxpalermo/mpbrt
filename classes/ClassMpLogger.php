@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,46 +23,44 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtMittente {
-    private $cap;
-    private $codice;
-    private $indirizzo;
-    private $localita;
-    private $ragione_sociale;
-    private $sigla_area;
-    
-    public function __construct($mitt) {
-        $this->cap = $mitt->CAP;
-        $this->codice = $mitt->CODICE;
-        $this->indirizzo = $mitt->INDIRIZZO;
-        $this->localita = $mitt->LOCALITA;
-        $this->ragione_sociale = $mitt->RAGIONE_SOCIALE;
-        $this->sigla_area = $mitt->SIGLA_AREA;
+
+try {
+    ClassMpLogger::exists();
+    return;
+} catch (Exception $exc) {
+    //nothing
+}
+
+class ClassMpLogger
+{
+    public static function add($message)
+    {
+        $debug = true;
+        
+        if ($debug==false) {
+            return;
+        }
+        
+        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
+        $function = debug_backtrace()[1]['function'];
+        $log = date('Y-m-d h:i:s') . " [" . $function . '] => ' . $message;
+        $handle = fopen($filename, 'a');
+        fwrite($handle, $log);
+        fwrite($handle, PHP_EOL);
+        fclose($handle);
+        chmod($filename, 0777);
     }
     
-    function getCap() {
-        return $this->cap;
+    public static function clear()
+    {
+        $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . 'log.txt';
+        if (file_exists($filename)) {
+            unlink($filename);
+        }
     }
-
-    function getCodice() {
-        return $this->codice;
+    
+    public static function exists()
+    {
+        return true;
     }
-
-    function getIndirizzo() {
-        return $this->indirizzo;
-    }
-
-    function getLocalita() {
-        return $this->localita;
-    }
-
-    function getRagioneSociale() {
-        return $this->ragione_sociale;
-    }
-
-    function getSiglaArea() {
-        return $this->sigla_area;
-    }
-
-
 }

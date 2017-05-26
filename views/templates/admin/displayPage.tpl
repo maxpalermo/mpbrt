@@ -22,6 +22,27 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of mpSOFT
 *}
+
+{if isset($confirmation)}
+    <div class="bootstrap">
+        <div class="module_confirmation conf confirm alert alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {$confirmation|escape:'htmlall':'UTF-8'}
+        </div>
+    </div>
+{/if}
+
+{if !empty($errors)}
+    <div class="bootstrap">
+        <div class="module_error alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {foreach $errors as $error}
+                <p>{$error|escape:'htmlall':'UTF-8'}</p>
+            {/foreach}
+        </div>
+    </div>
+{/if}
+
 <form method='POST' name='brt_form' id='brt_form'>
     <div class="panel">
         <div class="panel-heading">
@@ -34,19 +55,39 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th><span class="title_box">{l s='ID'}</span></th>
-                            <th><span class="title_box">{l s='DATE'}</span></th>
-                            <th><span class="title_box">{l s='TIME'}</span></th>
-                            <th><span class="title_box">{l s='EVENT'}</span></th>
-                            <th><span class="title_box">{l s='BRANCH'}</span></th>
-                            <th><span class="title_box">{l s='REFERENCE'}</span></th>
-                            <th><span class="title_box">{l s='TRACKING ID'}</span></th>
-                            <th><span class="title_box">{l s='CURRENT STATE'}</span></th>
+                            <th><span class="title_box">{l s='ID' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='DATE' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='TIME' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='EVENT' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='BRANCH' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='REFERENCE' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='TRACKING ID' mod='mpbrt'}</span></th>
+                            <th><span class="title_box">{l s='CURRENT STATE' mod='mpbrt'}</span></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {$rows}
+                        {foreach $rows as $row}
+                        <tr>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'><i class='{$row->ICON|escape:'htmlall':'UTF-8'}'</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->ID|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->DATA|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->ORA|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->DESCRIZIONE|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->FILIALE|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->REFERENCE|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->TRACKING_ID|escape:'htmlall':'UTF-8'}</td>
+                            <td style='color: {$row->COLOR|escape:'htmlall':'UTF-8'};'>{$row->STATE|escape:'htmlall':'UTF-8'}</td>
+                        </tr>
+                        {/foreach}
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="9" style="text-align: right;">
+                                {l s='Total rows:' mod='mpbrt'}
+                                <span id='brt_total_rows' style='font-weight: bold;'></span>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
 
@@ -55,7 +96,7 @@
             <div class="panel-footer">
                 <button type="submit" value="1" id="submit_process_orders" class="btn btn-default pull-right">
                     <i class="process-icon-save"></i> 
-                    {l s='Save' mod='mpadvpayment'}
+                    {l s='Save' mod='mpbrt'}
                 </button>
                 <input type='hidden' id='submit_hidden_process_orders' name="submit_process_orders" value='0'>
             </div>
@@ -65,19 +106,19 @@
             <pre>
                 <xmp>
                     sql:
-                    {$sql}
+                    {$sql|escape:'htmlall':'UTF-8'}
                 </xmp>
                 <xmp>
                     content:
-                    {$cont|print_r}
+                    {{$cont|print_r}|escape:'htmlall':'UTF-8'}
                 </xmp>
                 <xmp>
                     orders:
-                    {$orders|print_r}
+                    {{$orders|print_r}|escape:'htmlall':'UTF-8'}
                 </xmp>
                 <xmp>
                     rows:
-                    {$rows|print_r}
+                    {{$rows|print_r}|escape:'htmlall':'UTF-8'}
                 </xmp>
             </pre>
             {/if}
@@ -91,6 +132,9 @@
 <script type='text/javascript'>
     $(document).ready(function(){
         var objOrders = new Array();
+        var totalRows = $('#brt-tracking-orders >tbody >tr').length;
+        $('#brt_total_rows').html(totalRows);
+        
         $('#submit_process_orders').on('click', function(e){
             console.log("SUBMIT");
             console.log("objOrders: " + objOrders.length);
@@ -123,7 +167,7 @@
            $('#input_hidden_orders').val(JSON.stringify(objOrders));
            console.log("OBJECT: " + $('#input_hidden_orders').val());
            $("#submit_hidden_process_orders").val("1");
-           //$("#brt_form").submit();
+           $("#brt_form").submit();
        });
     });
 </script>

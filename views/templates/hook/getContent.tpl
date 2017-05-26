@@ -35,7 +35,7 @@
     <div class='panel' id='panel-config'>
         <div class='panel-heading'>
             <i class="icon-cogs"></i>
-            {l s='Configuration section' mod='mpadvpayment'}
+            {l s='Configuration section' mod='mpbrt'}
         </div>
         
         <div class="panel-body">
@@ -47,7 +47,7 @@
                     name="input_customer_id"
                     class="input fixed-width-lg" 
                     onfocus='javascript:$(this).select();'
-                    value='{$brt_customer_id}'
+                    value='{$brt_customer_id|escape:'htmlall':'UTF-8'}'
                     >
             </div>
             <div class="form-wrapper">
@@ -58,7 +58,13 @@
                     class="input fixed-width-lg" 
                     >
                     <option value="0">{l s='All' mod='mpbrt'}</option>
-                    {$brt_carrier_display_list}
+                    {foreach $brt_carrier_display_list as $option}
+                        <option 
+                            value='{$option->value|escape:'htmlall':'UTF-8'}' 
+                            {if $option->selected|escape:'htmlall':'UTF-8'}selected = 'selected'{/if}>
+                            {$option->name|escape:'htmlall':'UTF-8'}
+                        </option>
+                    {/foreach}
                 </select>
             </div>
             <div class="form-wrapper">
@@ -72,14 +78,14 @@
                                     <input 
                                         type="checkbox" 
                                         name="input_checkbox_skip_state[]" 
-                                        value="{$order_state['id_order_state']}" 
+                                        value="{$order_state['id_order_state']|escape:'htmlall':'UTF-8'}" 
                                         {if $order_state['checked']}
                                             checked="checked"
                                         {/if}
                                          />
                                 </td>
                                 <td>
-                                    {$order_state['name']}
+                                    {$order_state['name']|escape:'htmlall':'UTF-8'}
                                 </td>
                             </tr>
                         {/foreach}
@@ -95,7 +101,13 @@
                     class="input fixed-width-lg" 
                     >
                     <option value="0">{l s='None' mod='mpbrt'}</option>
-                    {$brt_order_tracking_list}
+                    {foreach $brt_order_tracking_list as $option}
+                        <option 
+                            value='{$option->value|escape:'htmlall':'UTF-8'}' 
+                            {if $option->selected|escape:'htmlall':'UTF-8'}selected = 'selected'{/if}>
+                            {$option->name|escape:'htmlall':'UTF-8'}
+                        </option>
+                    {/foreach}
                 </select>
             </div>
             <div class="form-wrapper">
@@ -106,7 +118,13 @@
                     class="input fixed-width-lg" 
                     >
                     <option value="0">{l s='None' mod='mpbrt'}</option>
-                    {$brt_order_delivered_list}
+                    {foreach $brt_order_delivered_list as $option}
+                        <option 
+                            value='{$option->value|escape:'htmlall':'UTF-8'}' 
+                            {if $option->selected|escape:'htmlall':'UTF-8'}selected = 'selected'{/if} >
+                            {$option->name|escape:'htmlall':'UTF-8'}
+                        </option>
+                    {/foreach}
                 </select>
             </div>
             {$input_switch_display_error}
@@ -130,7 +148,7 @@
         <div class="panel-footer">
             <button type="submit" value="1" id="submit_customer_save" name="submit_customer_save" class="btn btn-default pull-right">
                 <i class="process-icon-save"></i> 
-                {l s='Save' mod='mpadvpayment'}
+                {l s='Save' mod='mpbrt'}
             </button>
         </div>
     </div>

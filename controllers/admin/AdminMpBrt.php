@@ -24,7 +24,8 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class AdminMpBrtController extends ModuleAdminController {
+class AdminMpBrtController extends ModuleAdminController
+{
     public $smarty;
     public $lang;
     
@@ -52,7 +53,7 @@ class AdminMpBrtController extends ModuleAdminController {
             $this->id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
             $this->skip_states = explode(",", ConfigurationCore::get('MP_BRT_SKIP_STATES'));
             $this->switch_display_error = (int)ConfigurationCore::get('MP_BRT_SWITCH_DISPLAY_ERROR');
-            $this->debug = true;
+            $this->debug = false;
     }
 
     public function initToolbar()
@@ -63,24 +64,41 @@ class AdminMpBrtController extends ModuleAdminController {
 
     public function postProcess()
     {
-        if(Tools::isSubmit('submit_process_orders')) {
+        if (Tools::isSubmit('submit_process_orders')) {
             $arrayOrders = Tools::getValue('input_hidden_orders', '');
             $trackingOrders = Tools::jsonDecode($arrayOrders);
+            $delivered = 0;
+            $errors = array();
             
-            if($this->debug) {
-                print "<pre>";
-                print print_r($trackingOrders, 1);
-                print "</pre>";
-                return;
-            }
-            
-            foreach($arrayOrders as $objOrder)
-            {
-                $order = new OrderCore($objOrder->id);
-                if($objOrder->delivered) {
-                    $order->setCurrentState($this->id_delivered_order);
-                } else {
-                    $order->setCurrentState($this->id_tracking_order);
+            foreach ($trackingOrders as $objOrder) {
+                //Check if is a valid object
+                if ($objOrder->tracking_id!='ERROR' && (int)$objOrder->reference!=0) {
+                    if ($this->id_customer_reference=='reference') {
+                        $db = Db::getInstance();
+                        $sql = new DbQueryCore();
+                        $sql->select('id_order')
+                                ->from('orders')
+                                ->where('reference = \'' . pSQL($objOrder->reference) . '\'');
+                        $value = $db->getValue($sql);
+                        $order = new OrderCore($value);
+                    } else {
+                        $order = new OrderCore($objOrder->reference);
+                    }
+                    //Change status
+                    try {
+                        if ($objOrder->delivered) {
+                            if ($order->current_state!=$this->id_delivered_order) {
+                                $order->setCurrentState($this->id_delivered_order);
+                                $delivered++;
+                            }
+                        } else {
+                            if ($order->current_state!=$this->id_tracking_order) {
+                                $order->setCurrentState($this->id_tracking_order);
+                            }
+                        }
+                    } catch (Exception $exc) {
+                        $errors[] =  $this->l(sprintf('Order %s error: %s.', $order->reference, $exc->getMessage()));
+                    }
                 }
                 
                 //Check if tracking number exists in archive
@@ -91,7 +109,7 @@ class AdminMpBrtController extends ModuleAdminController {
                         ->where('tracking_number = \'' . pSQL($objOrder->tracking_id) . '\'');
                 $value = (int)$db->getValue($sql);
                 
-                if($value==0) {
+                if ($value==0) {
                     //No tracking number found, update orderCarrier
                     $sql = new DbQueryCore();
                     $sql->select('id_order_carrier')
@@ -99,14 +117,16 @@ class AdminMpBrtController extends ModuleAdminController {
                             ->where('id_order = ' . (int)$order->id);
                     $value = (int)$db->getValue($sql);
                     
-                    if($value!=0) {
+                    if ($value!=0) {
                         //Update orderCarrier tracking number
                         $orderCarrier = new OrderCarrierCore($value);
-                        $orderCarrier->tracking_number = $objOrder->tracking_id;    
+                        $orderCarrier->tracking_number = $objOrder->tracking_id;
                         $orderCarrier->save();
                     }
                 }
             }
+            $this->smarty->assign('confirmation', $this->l(sprintf('%d orders set to delvered status.', $delivered)));
+            $this->smarty->assign('errors', $errors);
         }
     }
 
@@ -116,12 +136,11 @@ class AdminMpBrtController extends ModuleAdminController {
             $this->addJS(_PS_MODULE_DIR_.'printlabelspro/views/js/label.js');
     }
 
-    public function initContent() 
-    {    
-
+    public function initContent()
+    {
         parent::initContent();
         
-        $soap = new classMpSoap($this->customer_id);
+        $soap = new ClassMpSoap($this->customer_id);
         
         $db = Db::getInstance();
         $sql = new DbQueryCore();
@@ -129,10 +148,10 @@ class AdminMpBrtController extends ModuleAdminController {
                 ->select('reference')
                 ->from('orders')
                 ->orderby('date_add DESC');
-        if($this->id_carrier_display!=0) {
+        if ($this->id_carrier_display!=0) {
             $sql->where('id_carrier = ' . pSQL($this->id_carrier_display));
         }
-        if($this->id_delivered_order!=0) {
+        if ($this->id_delivered_order!=0) {
             $this->skip_states[] = $this->id_delivered_order;
             $skip_sql = implode(',', $this->skip_states);
             $sql->where('current_state NOT in (' . pSQL($skip_sql) . ')');
@@ -143,23 +162,21 @@ class AdminMpBrtController extends ModuleAdminController {
         $rows = array();
         
         //$i=0;
-        foreach($orders as $order)
-        {
-            if($this->debug) {
+        foreach ($orders as $order) {
+            if ($this->debug) {
                 $objOrder = new OrderCore($order['id_order']);
                 $orderState = new OrderStateCore($objOrder->current_state);
                 
                 $tr = $this->buildTestRow(
-                        (int)$objOrder->reference,
-                        $orderState->name[Context::getContext()->language->id]);
-                
+                    (int)$objOrder->reference,
+                    $orderState->name[Context::getContext()->language->id]
+                );
             } else {
                 //$i++; if($i==20) {break;}
                 $evt = $soap->seekForDeliveredState((int)$order['reference'], (int)$order['id_order']);
-                if($evt!==false) {
-                    $row = $this->buildStatusRow($evt);
-                    $rows[] = $row;
-                } elseif ($evt===false &&  $this->switch_display_error==0) {
+                if ($evt!==false) {
+                    $tr = $this->buildStatusRow($evt);
+                } else {
                     //build an error row
                     $row = new stdClass();
                     $row->DATA=date('d.m.Y');
@@ -173,49 +190,38 @@ class AdminMpBrtController extends ModuleAdminController {
                     $tr = $this->buildStatusRow($row);
                 }
             }
-            $rows[] = $tr;
+            if (!empty($tr)) {
+                $rows[] = $tr;
+            }
         }
                 
-        $this->context->smarty->assign('rows', implode(PHP_EOL, $rows));
+        $this->context->smarty->assign('rows', $rows);
         $this->context->smarty->assign('cont', $this->content);
         $this->context->smarty->assign('orders', $orders);
         $this->context->smarty->assign('sql', $sql->__toString());
         $content = $this->smarty->fetch(_MPBRT_TEMPLATES_ . 'admin/displayPage.tpl');
         
         $this->context->smarty->assign('content', $this->content . $content);
-    } 
+    }
     
     private function buildStatusRow($row)
     {
-        if($row->ID<0) {
-            $color = '#a0a050';
-            $icon = "<i class='icon icon-warning'";
-        } elseif ($row->DESCRIZIONE=='CONSEGNATA') {
-            $color = '#50a050';
-            $icon = "<i class='icon icon-ok-sign'";
-        } elseif ($row->DESCRIZIONE=='SHIPPING NOT FOUND') {
-            $color = '#a05050';
-            $icon = "<i class='icon icon-ban'";
-        } else {
-            $color = "#666";
-            $icon = "<i class='icon icon-truck'";
+        if ($row->ID<0 && $this->switch_display_error==0) {
+            return '';
         }
         
-        $icon = $icon . " style='color: $color'></i>";
+        if ($row->DESCRIZIONE=='CONSEGNATA') {
+            $row->COLOR = '#50a050';
+            $row->ICON = 'icon icon-ok-sign';
+        } elseif ($row->DESCRIZIONE=='SHIPPING NOT FOUND') {
+            $row->COLOR = '#db981c';
+            $row->ICON = 'icon icon-ban';
+        } else {
+            $row->COLOR = "#666";
+            $row->ICON = 'icon icon-truck';
+        }
         
-        $tr = "<tr>"  
-                . "<td>$icon</td>"
-                . "<td style='color: $color';>" . $row->ID . "</td>"
-                . "<td style='color: $color';>" . $row->DATA . "</td>"
-                . "<td style='color: $color';>" . $row->ORA . "</td>"
-                . "<td style='color: $color';>" . $row->DESCRIZIONE . "</td>"
-                . "<td style='color: $color';>" . $row->FILIALE . "</td>"
-                . "<td style='color: $color';>" . $row->REFERENCE . "</td>"
-                . "<td style='color: $color';>" . $row->TRACKING_ID . "</td>"
-                . "<td style='color: $color';>" . $row->STATE . "</td>"
-                ."</tr>";
-            
-        return $tr;
+        return $row;
     }
     
     /**
@@ -226,14 +232,13 @@ class AdminMpBrtController extends ModuleAdminController {
     {
         $message = "";
         
-        if(!empty($esito) && !empty($esito))
-        {
+        if (!empty($esito) && !empty($esito)) {
             switch ((int)$esito) {
                 case 0:
-                    $message = $this->l('OK','classMpSoap');
+                    $message = $this->l('OK', 'classMpSoap');
                     break;
                 case -1:
-                    $message = $this->l('UNKNOWN ERROR','classMpSoap');
+                    $message = $this->l('UNKNOWN ERROR', 'classMpSoap');
                     break;
                 case -3:
                     $message = $this->l('ERROR CONNECTING DATABASE', 'classMpSoap');
@@ -264,7 +269,7 @@ class AdminMpBrtController extends ModuleAdminController {
     
     private function buildTestRow($reference, $current_state)
     {
-        $id = rand(100,999);
+        $id = rand(100, 999);
         $date = date('d.m.Y');
         $time = date('h:i');
         $event = array(
@@ -289,12 +294,12 @@ class AdminMpBrtController extends ModuleAdminController {
             'ANCONA',
             'CAGLIARI'
         );
-        $tracking_id = '1690100' . rand(10000,99999);
+        $tracking_id = '1690100' . rand(10000, 99999);
         
         $current_event = $event[rand(0, count($event)-1)];
         $current_branch = $branch[rand(0, count($branch)-1)];
         
-        if($current_event=='SHIPPING NOT FOUND') {
+        if ($current_event=='SHIPPING NOT FOUND') {
             $tracking_id = 'ERROR';
         }
         

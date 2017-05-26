@@ -28,7 +28,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once(dirname(__FILE__) . '/classes/classMpBrtAutoload.php');
+require_once(dirname(__FILE__) . '/classes/ClassMpBrtAutoload.php');
     
 class MpBrt extends Module
 {
@@ -49,43 +49,43 @@ class MpBrt extends Module
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
       
         //SET DEFINITIONS
-        if(!defined('_MPBRT_URL_')) {
+        if (!defined('_MPBRT_URL_')) {
             define('_MPBRT_URL_', $this->_path);
         }
         
-        if(!defined('_MPBRT_')) {
+        if (!defined('_MPBRT_')) {
             define('_MPBRT_', $this->local_path);
         }
 
-        if(!defined('_MPBRT_CLASSES_')) {
+        if (!defined('_MPBRT_CLASSES_')) {
             define('_MPBRT_CLASSES_', _MPBRT_ . "classes/");
         }
 
-        if(!defined('_MPBRT_CONTROLLERS_')) {
+        if (!defined('_MPBRT_CONTROLLERS_')) {
             define('_MPBRT_CONTROLLERS_', _MPBRT_ . "controllers/");
         }
 
-        if(!defined('_MPBRT_CSS_URL_')) {
+        if (!defined('_MPBRT_CSS_URL_')) {
             define('_MPBRT_CSS_URL_', _MPBRT_URL_ . "views/css/");
         }
 
-        if(!defined('_MPBRT_JS_URL_')) {
+        if (!defined('_MPBRT_JS_URL_')) {
             define('_MPBRT_JS_URL_', _MPBRT_URL_ . "views/js/");
         }
 
-        if(!defined('_MPBRT_IMG_URL_')) {
+        if (!defined('_MPBRT_IMG_URL_')) {
             define('_MPBRT_IMG_URL_', _MPBRT_URL_ . "views/img/");
         }
 
-        if(!defined('_MPBRT_TEMPLATES_')) {
+        if (!defined('_MPBRT_TEMPLATES_')) {
             define('_MPBRT_TEMPLATES_', _MPBRT_ . "views/templates/");
         }
         
-        if(!defined('_MPBRT_TEMPLATES_HOOK_')) {
+        if (!defined('_MPBRT_TEMPLATES_HOOK_')) {
             define('_MPBRT_TEMPLATES_HOOK_', _MPBRT_TEMPLATES_ . "hook/");
         }
         
-        if(!defined('_MPBRT_TEMPLATES_FRONT_')) {
+        if (!defined('_MPBRT_TEMPLATES_FRONT_')) {
             define('_MPBRT_TEMPLATES_FRONT_', _MPBRT_TEMPLATES_ . "front/");
         }
     }
@@ -116,36 +116,32 @@ class MpBrt extends Module
     
     public function installTab()
     {
-            $tab = new Tab();
-            $tab->active = 1;
-            $tab->class_name = 'AdminMpBrt';
-            $tab->name = array();
-            foreach (Language::getLanguages(true) as $lang)
-            {
-                    $tab->name[$lang['id_lang']] = 'MP BRT';
-            }
-            $tab->id_parent = (int)Tab::getIdFromClassName('AdminParentOrders');
-            $tab->module = $this->name;
-            return $tab->add();
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = 'AdminMpBrt';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = 'MP BRT';
+        }
+        $tab->id_parent = (int)Tab::getIdFromClassName('AdminParentOrders');
+        $tab->module = $this->name;
+        return $tab->add();
     }
 
     public function uninstallTab()
     {
-            $id_tab = (int)Tab::getIdFromClassName('AdminMpBrt');
-            if ($id_tab)
-            {
-                    $tab = new Tab($id_tab);
-                    return $tab->delete();
-            }
-            else
-            {
-                    return false;
-            }
+        $id_tab = (int)Tab::getIdFromClassName('AdminMpBrt');
+        if ($id_tab) {
+            $tab = new Tab($id_tab);
+            return $tab->delete();
+        } else {
+            return false;
+        }
     }
     
     public function hookDisplayAdminOrder($params)
     {
-        classMpLogger::clear();
+        ClassMpLogger::clear();
         
         $smarty = Context::getContext()->smarty;
         
@@ -154,11 +150,11 @@ class MpBrt extends Module
         
         $id_order = (int)Tools::getValue('id_order');
         $order = new OrderCore($id_order);
-        if($order->id_carrier!=$id_carrier_display) {
+        if ($order->id_carrier!=$id_carrier_display) {
             return false;
         }
         $reference = $order->reference;
-        $soap = new classMpSoap($customer_id, $this);
+        $soap = new ClassMpSoap($customer_id, $this);
         $soap->getOrderHistory((int)$reference);
         $bolla = $soap->getBolla();
         if (!$bolla) {
@@ -190,7 +186,7 @@ class MpBrt extends Module
     
     public function getContent()
     {
-        classMpLogger::clear();
+        ClassMpLogger::clear();
         
         $this->smarty = Context::getContext()->smarty;
         $message = $this->postProcess();
@@ -208,75 +204,65 @@ class MpBrt extends Module
         $id_customer_reference = ConfigurationCore::get('MP_BRT_CUSTOMER_REFERENCE');
         $switch_display_error = (int)ConfigurationCore::get('MP_BRT_SWITCH_DISPLAY_ERROR');
         
-        $this->addSwitch('input_switch_display_error', 
-                $this->l('Show Tracking error?', 'mpbrt'), 
-                $this->smarty, 
-                $switch_display_error);
+        $this->addSwitch(
+            'input_switch_display_error',
+            $this->l('Show Tracking error?', 'mpbrt'),
+            $this->smarty,
+            $switch_display_error
+        );
         
         $this->smarty->assign('brt_customer_id', $customer_id);
-        $this->smarty->assign('brt_carrier_display_list', implode(PHP_EOL, $this->getCarriers($id_carrier_display)));
-        $this->smarty->assign('brt_order_tracking_list', implode(PHP_EOL, $this->getOrderStates($id_tracking_order)));
-        $this->smarty->assign('brt_order_delivered_list', implode(PHP_EOL, $this->getOrderStates($id_delivered_order)));
+        $this->smarty->assign('brt_carrier_display_list', $this->getCarriers($id_carrier_display));
+        $this->smarty->assign('brt_order_tracking_list', $this->getOrderStates($id_tracking_order));
+        $this->smarty->assign('brt_order_delivered_list', $this->getOrderStates($id_delivered_order));
         $this->smarty->assign('brt_customer_reference', $id_customer_reference);
-        $this->smarty->assign('brt_order_skipped',$this->getArrayOrderStates());
+        $this->smarty->assign('brt_order_skipped', $this->getArrayOrderStates());
         $template  = $this->display(__FILE__, 'getContent.tpl');
         return $template;
+    }
+    
+    private function getObjectList($objects, $id_selected)
+    {
+        $list = array();
+        foreach ($objects as $object) {
+            $output = new stdClass();
+            $output->value = $object['id'];
+            $output->name = $object['name'];
+            if ($object['id']==$id_selected) {
+                $output->selected = true;
+            } else {
+                $output->selected=false;
+            }
+            $list[] = $output;
+        }
+        return $list;
     }
     
     private function getCarriers($id_carrier)
     {
         $carriers = CarrierCore::getCarriers(Context::getContext()->language->id);
-        $list = array();
-        foreach($carriers as $carrier)
-        {
-            if($carrier['id_carrier']==$id_carrier) {
-                $selected = " selected='selected' ";
-            } else {
-                $selected = "";
-            }
-            $option = "<option value='"
-                    . $carrier['id_carrier'] 
-                    . "'"
-                    . $selected
-                    . ">"
-                    . $carrier['name']
-                    . "</option>";
-            $list[] = $option;
+        foreach ($carriers as &$carrier) {
+            $carrier['id'] = $carrier['id_carrier'];
         }
-        return $list;
+        return $this->getObjectList($carriers, $id_carrier);
     }
     
     private function getOrderStates($id_order_state)
     {
         $states = OrderStateCore::getOrderStates(Context::getContext()->language->id);
-        $list = array();
-        foreach($states as $state)
-        {
-            if($state['id_order_state']==$id_order_state) {
-                $selected = " selected='selected' ";
-            } else {
-                $selected = "";
-            }
-            $option = "<option value='"
-                    . $state['id_order_state'] 
-                    . "'"
-                    . $selected
-                    . ">"
-                    . $state['name']
-                    . "</option>";
-            $list[] = $option;
+        foreach ($states as &$state) {
+            $state['id'] = $state['id_order_state'];
         }
-        return $list;
+        return $this->getObjectList($states, $id_order_state);
     }
     
     private function getArrayOrderStates()
     {
         $order_states = OrderStateCore::getOrderStates(Context::getContext()->language->id);
-        $order_checked = explode(",",ConfigurationCore::get('MP_BRT_SKIP_STATES'));
+        $order_checked = explode(",", ConfigurationCore::get('MP_BRT_SKIP_STATES'));
         
-        foreach($order_states as &$order_state)
-        {
-            if(in_array($order_state['id_order_state'], $order_checked)) {
+        foreach ($order_states as &$order_state) {
+            if (in_array($order_state['id_order_state'], $order_checked)) {
                 $order_state['checked']=true;
             } else {
                 $order_state['checked']=false;
@@ -288,14 +274,14 @@ class MpBrt extends Module
     
     public function postProcess()
     {
-        if(Tools::isSubmit('submit_customer_save')) {
+        if (Tools::isSubmit('submit_customer_save')) {
             $customer_id = (int)Tools::getValue('input_customer_id', 0);
             $id_carrier_display = (int)Tools::getValue('input_select_carrier_display', 0);
             $id_tracking_order = (int)Tools::getValue('input_select_state_tracking', 0);
             $id_delivered_order = (int)Tools::getValue('input_select_state_delivered', 0);
             $id_customer_reference = Tools::getValue('input_select_customer_reference', 'reference');
-            $switch_display_error = (int)Tools::getValue('input_switch_display_error_val', 0);
-            $skip_states = implode(",",Tools::getValue('input_checkbox_skip_state'));
+            $switch_display_error = (int)Tools::getValue('input_switch_display_error', 0);
+            $skip_states = implode(",", Tools::getValue('input_checkbox_skip_state'));
             
             ConfigurationCore::updateValue('MP_BRT_CUSTOMER_ID', $customer_id);
             ConfigurationCore::updateValue('MP_BRT_ID_CARRIER_DISPLAY', $id_carrier_display);

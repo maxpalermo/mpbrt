@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,14 +23,17 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtEvento {
+
+class ClassBrtEvento
+{
     private $data;
     private $descrizione;
     private $filiale;
     private $id;
     private $ora;
     
-    public function __construct($evento) {
+    public function __construct($evento)
+    {
         $data = $evento->EVENTO;
         $this->data = $data->DATA;
         $this->descrizione = $data->DESCRIZIONE;
@@ -40,25 +42,28 @@ class classBrtEvento {
         $this->ora = $data->ORA;
     }
     
-    function getData() {
+    public function getData()
+    {
         return $this->data;
     }
 
-    function getDescrizione() {
+    public function getDescrizione()
+    {
         return $this->descrizione;
     }
 
-    function getFiliale() {
+    public function getFiliale()
+    {
         return $this->filiale;
     }
 
-    function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    function getOra() {
+    public function getOra()
+    {
         return $this->ora;
     }
-
-
 }

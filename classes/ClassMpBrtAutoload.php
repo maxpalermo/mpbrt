@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,34 +23,8 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtContrassegno {
-    private $divisa;
-    private $importo;
-    private $incasso;
-    private $particolarita;
-    
-    public function __construct($contrassegno) {
-        $this->divisa = $contrassegno->CONTRASSEGNO_DIVISA;
-        $this->importo = $contrassegno->CONTRASSEGNO_IMPORTO;
-        $this->incasso = $contrassegno->CONTRASSEGNO_INCASSO;
-        $this->particolarita = $contrassegno->CONTRASSEGNO_PARTICOLARITA;
-    }
-    
-    function getDivisa() {
-        return $this->divisa;
-    }
 
-    function getImporto() {
-        return $this->importo;
-    }
-
-    function getIncasso() {
-        return $this->incasso;
-    }
-
-    function getParticolarita() {
-        return $this->particolarita;
-    }
-
-
+$classes = glob(dirname(__FILE__) . DIRECTORY_SEPARATOR . "*.php");
+foreach ($classes as $class) {
+    require_once $class;
 }

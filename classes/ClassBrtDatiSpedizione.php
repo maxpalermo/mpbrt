@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,7 +23,9 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtDatiSpedizione {
+
+class ClassBrtDatiSpedizione
+{
     private $cod_filiale_arrivo;
     private $descrizione_1;
     private $descrizione_2;
@@ -39,7 +40,8 @@ class classBrtDatiSpedizione {
     private $tipo_porto;
     private $tipo_servizio;
     
-    public function __construct($spedizione) {
+    public function __construct($spedizione)
+    {
         $this->cod_filiale_arrivo = $spedizione->COD_FILIALE_ARRIVO;
         $this->descrizione_1 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE1;
         $this->descrizione_2 = $spedizione->DESCRIZIONE_STATO_SPED_PARTE2;
@@ -55,56 +57,68 @@ class classBrtDatiSpedizione {
         $this->tipo_servizio = $spedizione->TIPO_SERVIZIO;
     }
     
-    function getCodFilialeArrivo() {
+    public function getCodFilialeArrivo()
+    {
         return $this->cod_filiale_arrivo;
     }
 
-    function getDescrizione1() {
+    public function getDescrizione1()
+    {
         return $this->descrizione_1;
     }
 
-    function getDescrizione2() {
+    public function getDescrizione2()
+    {
         return $this->descrizione_2;
     }
 
-    function getFilialeArrivo() {
+    public function getFilialeArrivo()
+    {
         return $this->filiale_arrivo;
     }
 
-    function getFilialeArrivoURL() {
+    public function getFilialeArrivoURL()
+    {
         return $this->filiale_arrivo_url;
     }
 
-    function getPorto() {
+    public function getPorto()
+    {
         return $this->porto;
     }
 
-    function getServizio() {
+    public function getServizio()
+    {
         return $this->servizio;
     }
 
-    function getData() {
+    public function getData()
+    {
         return $this->data;
     }
 
-    function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    function getStato1() {
+    public function getStato1()
+    {
         return $this->stato_1;
     }
 
-    function getStato2() {
+    public function getStato2()
+    {
         return $this->stato_2;
     }
 
-    function getTipoPorto() {
+    public function getTipoPorto()
+    {
         return $this->tipo_porto;
     }
 
-    function getTipoServizio() {
+    public function getTipoServizio()
+    {
         return $this->tipo_servizio;
     }
-
 }

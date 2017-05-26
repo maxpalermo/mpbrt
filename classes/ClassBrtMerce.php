@@ -24,9 +24,38 @@
  *  International Registered Trademark & Property of mpSOFT
  */
 
-$classes = glob(dirname(__FILE__) . DIRECTORY_SEPARATOR . "*.php");
-foreach($classes as $class)
+class ClassBrtMerce
 {
-    require_once $class;
-}
+    private $colli;
+    private $natura_merce;
+    private $peso_kg;
+    private $volume_m3;
+    
+    public function __construct($merce)
+    {
+        $this->colli = $merce->COLLI;
+        $this->natura_merce = $merce->NATURA_MERCE;
+        $this->peso_kg = $merce->PESO_KG;
+        $this->volume_m3 = $merce->VOLUME_M3;
+    }
+    
+    public function getColli()
+    {
+        return $this->colli;
+    }
 
+    public function getNaturaMerce()
+    {
+        return $this->natura_merce;
+    }
+
+    public function getPesoKg()
+    {
+        return $this->peso_kg;
+    }
+
+    public function getVolumeM3()
+    {
+        return $this->volume_m3;
+    }
+}

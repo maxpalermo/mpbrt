@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 2017 mpSOFT
  *
@@ -24,7 +23,9 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of mpSOFT
  */
-class classBrtDatiConsegna {
+
+class ClassBrtDatiConsegna
+{
     private $data_consegna_merce;
     private $data_consegna_richiesta;
     private $data_teorica_consegna;
@@ -36,7 +37,8 @@ class classBrtDatiConsegna {
     private $ora_teorica_consegna_da;
     private $tipo_consegna_richiesta;
     
-    public function __construct($consegna) {
+    public function __construct($consegna)
+    {
         $this->data_consegna_merce = $consegna->DATA_CONSEGNA_MERCE;
         $this->data_consegna_richiesta = $consegna->DATA_CONS_RICHIESTA;
         $this->data_teorica_consegna = $consegna->DATA_TEORICA_CONSEGNA;
@@ -49,45 +51,53 @@ class classBrtDatiConsegna {
         $this->tipo_consegna_richiesta = $consegna->TIPO_CONS_RICHIESTA;
     }
     
-    function getDataConsegnaMerce() {
+    public function getDataConsegnaMerce()
+    {
         return $this->data_consegna_merce;
     }
 
-    function getDataConsegnaRichiesta() {
+    public function getDataConsegnaRichiesta()
+    {
         return $this->data_consegna_richiesta;
     }
 
-    function getDataTeoricaConsegna() {
+    public function getDataTeoricaConsegna()
+    {
         return $this->data_teorica_consegna;
     }
 
-    function getDescrizioneConsegnaRichiesta() {
+    public function getDescrizioneConsegnaRichiesta()
+    {
         return $this->descrizione_consegna_richiesta;
     }
 
-    function getFirmatarioConsegna() {
+    public function getFirmatarioConsegna()
+    {
         return $this->firmatario_consegna;
     }
 
-    function getOraConsegnaMerce() {
+    public function getOraConsegnaMerce()
+    {
         return $this->ora_consegna_merce;
     }
 
-    function getOraConsegnaRichiesta() {
+    public function getOraConsegnaRichiesta()
+    {
         return $this->ora_consegna_richiesta;
     }
 
-    function getOraTeoricaConsegnaA() {
+    public function getOraTeoricaConsegnaA()
+    {
         return $this->ora_teorica_consegna_a;
     }
 
-    function getOraTeoricaConsegnaDa() {
+    public function getOraTeoricaConsegnaDa()
+    {
         return $this->ora_teorica_consegna_da;
     }
 
-    function getTipoConsegnaRichiesta() {
+    public function getTipoConsegnaRichiesta()
+    {
         return $this->tipo_consegna_richiesta;
     }
-
-
 }

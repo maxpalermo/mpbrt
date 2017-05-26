@@ -25,30 +25,30 @@
 
 <div class="form-group">
 	<label class="control-label col-lg-3 ">
-			<span>{$switch->label}</span>
+			<span>{$switch->label|escape:'htmlall':'UTF-8'}</span>
 	</label>
 	<div class="col-lg-9">
 			<span 
 				class="switch prestashop-switch fixed-width-lg" 
-				id='{$switch->name}_val'
-				name='{$switch->name}_val'
+				id='{$switch->name|escape:'htmlall':'UTF-8'}_val'
+				name='{$switch->name|escape:'htmlall':'UTF-8'}_val'
 				switch='1'
 				>
 			<input 
 				type="radio" 
 				value="1" 
-				name="{$switch->name}"
-				id="{$switch->name}_on" 
+				name="{$switch->name|escape:'htmlall':'UTF-8'}"
+				id="{$switch->name|escape:'htmlall':'UTF-8'}_on" 
 				checked="checked"
-				onclick='javascript:$("#{$switch->name}_val").attr("switch",1);'>
-			<label for="{$switch->name}_on">{l s='YES' mod='mpadvpayment'}</label>
+				onclick='javascript:$("#{$switch->name|escape:'htmlall':'UTF-8'}_val").attr("switch",1);'>
+			<label for="{$switch->name|escape:'htmlall':'UTF-8'}_on">{l s='YES' mod='mpbrt'}</label>
 			<input 
 				type="radio" 
 				value="0" 
-				name="{$switch->name}"
-				id="{$switch->name}_off"
-				onclick='javascript:$("#{$switch->name}_val").attr("switch",0);'>
-			<label for="{$switch->name}_off">{l s='NO' mod='mpadvpayment'}</label>
+				name="{$switch->name|escape:'htmlall':'UTF-8'}"
+				id="{$switch->name|escape:'htmlall':'UTF-8'}_off"
+				onclick='javascript:$("#{$switch->name|escape:'htmlall':'UTF-8'}_val").attr("switch",0);'>
+			<label for="{$switch->name|escape:'htmlall':'UTF-8'}_off">{l s='NO' mod='mpbrt'}</label>
 			<a class="slide-button btn"></a>
 			</span>
 	</div>
@@ -57,9 +57,9 @@
 <script type='text/javascript'>
     $(document).ready(function(){
         {if $switch->value==1}
-            $("#{$switch->name}_on").click();
+            $("#{$switch->name|escape:'htmlall':'UTF-8'}_on").click();
         {else}
-            $("#{$switch->name}_off").click();
+            $("#{$switch->name|escape:'htmlall':'UTF-8'}_off").click();
         {/if}
     });
 </script>
